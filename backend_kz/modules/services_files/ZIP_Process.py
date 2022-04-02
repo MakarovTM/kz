@@ -19,7 +19,7 @@ class ZIP_Process:
 
         self.zip_file_content = zipfile.ZipFile(zip_file_content)
 
-    def zip_file_show_structure(self, filename_mask = None) -> list:
+    def zipFileShowStructure(self, filename_mask = None) -> list:
 
         """
             Автор:      Макаров Алексей

@@ -65,6 +65,7 @@ class ServerRegionFolder:
 
 		if self.server_connection.change_server_folder(self.__to_process_server_path()) == 0:
 			for archived in tqdm(self.__to_process_server_files(mode = 1)):
+				print(archived)
 				ServerRegionFolderZip(
 					self.server_connection.upload_server_file_in_ram(archived)
 				).run_archived_purchases_processing()

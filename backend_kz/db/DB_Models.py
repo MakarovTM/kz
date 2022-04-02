@@ -3,8 +3,9 @@ import datetime
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 
-from sqlalchemy import DateTime
 from sqlalchemy import String
+from sqlalchemy import Boolean
+from sqlalchemy import DateTime
 from sqlalchemy import Integer, Float
 
 from sqlalchemy.ext.declarative import declarative_base
@@ -34,6 +35,26 @@ class RepublishedNotifications(Base):
     pdt = Column(DateTime)
     cdt = Column(DateTime, default = datetime.datetime.utcnow)
     udt = Column(DateTime)
+
+
+class ContractProjectTimeLine(Base):
+
+    """
+        Автор:      Макаров Алексей
+        Описание:   Модель данных, описывающая
+                    хронологию процесса заключение контракта
+    """
+
+    __tablename__ = "contract_project_timeline"
+
+    id  = Column(Integer, primary_key = True)
+    pnb = Column(String(length = 50), unique = True)
+    hpb = Column(Boolean())
+    hch = Column(Boolean())
+    hsg = Column(Boolean())
+    hcl = Column(Boolean())
+    hcf = Column(Boolean())
+    cdt = Column(DateTime, default = datetime.datetime.utcnow)
 
 
 def main(db_connection) -> int:

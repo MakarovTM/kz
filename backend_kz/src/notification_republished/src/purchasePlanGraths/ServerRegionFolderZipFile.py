@@ -56,6 +56,9 @@ class ServerRegionFolderZipFile:
                 )
             )
 
+            if prc == "81200.0; 243600.12":
+                print(ikz)
+
             self.dbConnection.addObjectToSession(
                 RepublishedNotifications(
                     ikz = ikz, obj = obj, okv = okv, prc = prc, crn = ikz[3:13]

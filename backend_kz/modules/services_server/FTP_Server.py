@@ -19,6 +19,7 @@ class FTP_Server:
 		"""
 
 		self.server_connection = ftplib.FTP(host = host, user = user, passwd = password)
+		self.server_connection.set_pasv(False)
 
 	def __del__(self) -> None:
 

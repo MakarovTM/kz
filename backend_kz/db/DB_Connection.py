@@ -39,8 +39,11 @@ class DB_Connection:
         """
 
         self.dbConnection = create_engine(
-            "mysql+mysqlconnector://makaleot_kz:SG&M0a7*@makaleot.beget.tech/makaleot_kz"
+            "mysql+mysqlconnector://alderson:pops3@62.113.97.50:3306/tenders_master?auth_plugin=mysql_native_password",
+            pool_recycle = 3600
         )
+
+        print(dm_models_main(self.dbConnection))
 
         return 0
 
@@ -57,12 +60,6 @@ class DB_Connection:
 
         return 0
 
-    def addObjectToSession(self, sessionItem):
-
-        self.dbConSessionItems.append(sessionItem)
-
     def commitSession(self):
 
-
-        self.dbConSession.bulk_save_objects(self.dbConSessionItems)
         self.dbConSession.commit()
