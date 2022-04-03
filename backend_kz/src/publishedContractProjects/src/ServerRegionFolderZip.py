@@ -2,7 +2,7 @@ import io
 import re
 
 from db.DB_Connection import DB_Connection
-from db.DB_Models     import ContractProjectTimeLine
+from db.DB_ModelsStorage import ContractProjectTimeLine
 
 from modules.services_files.ZIP_Process import ZIP_Process
 
@@ -44,7 +44,8 @@ class ServerRegionFolderZip:
 
         """
             Автор:      Макаров Алексей
-            Описание:   Обновление записи о хронологии процесса заключения контракта
+            Описание:   Обновление записи 
+                        о хронологии процесса заключения контракта
         """
 
         self.dbConnection.dbConSession.query(ContractProjectTimeLine).\
@@ -62,3 +63,17 @@ class ServerRegionFolderZip:
 
             purchaseNumber = re.findall(r"_(\d+)_", i)[0]
 
+            if "cpContractProject_" in i:
+                self.__createContractProjectMileStone(purchaseNumber)
+
+            if "cpContractSign_" in i:
+                self.__updateContractProjectMileStone(purchaseNumber, "hsg")
+            
+            if "cpProcedureCancel_" in i:
+                self.__updateContractProjectMileStone(purchaseNumber, "hcl")
+
+            if "cpContractProjectChange_" in i:
+                self.__updateContractProjectMileStone(purchaseNumber, "hch")
+            
+            if "cpProcedureCancelFailure_" in i:
+                self.__updateContractProjectMileStone(purchaseNumber, "hcf")

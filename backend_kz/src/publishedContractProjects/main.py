@@ -20,5 +20,4 @@ def main():
 
     for fz44ProcessRegion in tqdm(fz44ProcessRegions):
         ServerRegionFolder(fz44ProcessRegion).runServerRegionFolderProcessing()
-
-    dbConnection.commitSession()
+        dbConnection.commitSession()

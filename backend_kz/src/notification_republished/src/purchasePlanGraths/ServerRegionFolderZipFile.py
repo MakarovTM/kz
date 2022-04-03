@@ -1,5 +1,5 @@
 from db.DB_Connection import DB_Connection
-from db.DB_Models import RepublishedNotifications
+from db.DB_ModelsStorage import RepublishedNotifications
 
 from modules.services_files.XML_Process import XML_Process
 
@@ -30,37 +30,35 @@ class ServerRegionFolderZipFile:
             Описание:   Выполнение извлечения данных
         """
 
-        for elem in self.purchase_file_content.createNewRootIterator("{http://zakupki.gov.ru/oos/TPtypes/1}position"):
+        for elem in self.purchase_file_content.createNewRootIterator("position"):
             
-            ikz = (
-                self.purchase_file_content.essenceDataWithNeighbours(
-                    "commonInfo", "IKZ", elem
-                )
+            ikz = self.purchase_file_content.essenceDataWithPaths(
+                ["commonInfo/IKZ"], multi = False, element = elem
             )
 
-            okv = (
-                self.purchase_file_content.essenceDataWithNeighbours(
-                    "OKPD2Info", "OKPDCode", elem
-                )
+            okv = self.purchase_file_content.essenceDataWithPaths(
+                [
+                    "OKPD2Info",
+                    "OKPDCode"
+                ], multi = True, element = elem
             )
 
-            obj = (
-                self.purchase_file_content.essenceDataWithNeighbours(
-                    "commonInfo", "purchaseObjectInfo", elem
-                )
+            obj = self.purchase_file_content.essenceDataWithPaths(
+                ["commonInfo/purchaseObjectInfo"], multi = False, element = elem
             )
 
-            prc = (
-                self.purchase_file_content.essenceDataWithNeighbours(
-                    "financeInfo", "total", elem
-                )
+            prc = self.purchase_file_content.essenceDataWithPaths(
+                ["financeInfo/total"], multi = False, element = elem
             )
 
-            if prc == "81200.0; 243600.12":
-                print(ikz)
+            mrs = self.purchase_file_content.essenceDataWithPaths(
+                ["commonInfo/positionModification/changeReason/name"], multi = False, element = elem
+            )
 
-            self.dbConnection.addObjectToSession(
+            self.dbConnection.dbConSessionItems.append(
                 RepublishedNotifications(
-                    ikz = ikz, obj = obj, okv = okv, prc = prc, crn = ikz[3:13]
+                    ikz = ikz, okv = okv, obj = obj, prc = prc, crn = ikz[4:13], mrs = mrs
                 )
             )
+        
+        self.dbConnection.commitSession()

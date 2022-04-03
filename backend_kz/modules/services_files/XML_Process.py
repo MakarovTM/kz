@@ -1,11 +1,12 @@
+from lxml import etree
 import xml.etree.ElementTree as ET
 
 
 class XML_Process:
 
     """
-        Автор:      Макаров Алексей
-        Описание:   Выполнение обработки файла в формате XML
+        Автор:          Макаров Алексей
+        Описание:       Выполнение обработки файла в формате XML
     """
 
     def __init__(self, xml_file_content: bytes) -> None:
@@ -15,9 +16,23 @@ class XML_Process:
             Описание:   Инициализация класса по обработке XML файла
         """
 
-        self.fileContent = ET.fromstring(xml_file_content)
+        self.fileContent = etree.fromstring(xml_file_content)
 
-    def createNewRootIterator(self, newRootTag: str):
+        self.__cleanUpNameSpaces()
+
+    def __cleanUpNameSpaces(self) -> None:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Удаление пространства имен из XML файла
+        """
+
+        for elem in self.fileContent.getiterator():
+            if not isinstance(elem, (etree._Comment, etree._ProcessingInstruction)):
+                elem.tag = etree.QName(elem).localname
+        etree.cleanup_namespaces(self.fileContent)
+
+    def createNewRootIterator(self, newRootTag: str) -> list:
 
         """
             Автор:      Макаров Алексей
@@ -27,27 +42,42 @@ class XML_Process:
 
         newRoots = []
 
-        for newRoot in self.fileContent.iter(newRootTag):
-            if len(newRoot) != 0: newRoots.append(newRoot)
+        for newRoot in self.fileContent.getiterator(newRootTag):
+            if len(newRoot) != 0: 
+                newRoots.append(newRoot)
 
         return newRoots
 
-    def essenceDataWithNeighbours(
-        self, tagParent: str, tagChild: str, element = None) -> str:
+    def showSTR(self):
+
+        print(etree.tostring(self.fileContent).decode())
+
+    def __createRootIterator(self, rootTag: str, rootElement = None) -> tuple:
 
         """
             Автор:      Макаров Алексей
-            Описание:   Извлечение значения из XML дерева 
-                        согласно значению родительских и дочерних тегов элемента
+            Описание:   Создание нового корневого элемента
+        """
+
+        rootElement = rootElement if rootElement is not None else self.fileContent
+
+        return (childRoot for childRoot in rootElement.getiterator(rootTag) if len(childRoot) != 0)
+
+    def essenceDataWithPaths(self, essencePaths: list, multi = False, element = None) -> str:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Извлечение данных из XML дерева согласно URI 
         """
 
         essencedValues = []
         essenceElement = element if element is not None else self.fileContent
 
-        for essenceTagParent in essenceElement.iter():
-            if tagParent in essenceTagParent.tag:
-                for essenceTagChild in essenceTagParent:
-                    if tagChild in essenceTagChild.tag:
-                        essencedValues.append(essenceTagChild.text)
+        if multi == True:
+            for elem in self.__createRootIterator(essencePaths[0], element):
+                essencedValues.append(elem.find(essencePaths[1]).text)
+        else:
+            if essenceElement.find(essencePaths[0]) is not None:
+                essencedValues.append(essenceElement.find(essencePaths[0]).text)
 
         return "; ".join(set(essencedValues))

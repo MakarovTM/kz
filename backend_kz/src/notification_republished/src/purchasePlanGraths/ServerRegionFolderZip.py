@@ -1,5 +1,7 @@
 import io
 
+from tqdm import tqdm
+
 from modules.services_files.ZIP_Process import ZIP_Process
 
 from src.notification_republished.src.purchasePlanGraths.ServerRegionFolderZipFile import ServerRegionFolderZipFile
@@ -30,7 +32,7 @@ class ServerRegionFolderZip:
             Описание:   Выполнение запуска процесса обработки архивированного файла
         """
 
-        for purchase_file in self.ziped_purchases.zip_file_show_structure(self.ziped_purchases_filename_mask):
+        for purchase_file in tqdm(self.ziped_purchases.zipFileShowStructure(self.ziped_purchases_filename_mask)):
             ServerRegionFolderZipFile(
                 self.ziped_purchases.zip_file_read(purchase_file)
             ).essenceData()

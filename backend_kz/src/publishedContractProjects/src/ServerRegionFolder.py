@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 
 from tqdm import tqdm
@@ -36,7 +37,7 @@ class ServerRegionFolder:
         if self.currentTimeStamp.strftime("%d") == "1":
             return f"/fcs_regions/{self.processingRegion}/contractprojects/prevMonth"
 
-        return f"/fcs_regions/{self.processingRegion}/contractprojects/prevMonth"
+        return f"/fcs_regions/{self.processingRegion}/contractprojects/currMonth"
 
     def __changeServerPathToProcess(self) -> int:
 

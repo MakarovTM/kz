@@ -33,6 +33,7 @@ class RepublishedNotifications(Base):
     rid = Column(Integer, ForeignKey("republished_notifications.id"))
     pnb = Column(String(length = 20))
     pdt = Column(DateTime)
+    mrs = Column(String(length = 500))
     cdt = Column(DateTime, default = datetime.datetime.utcnow)
     udt = Column(DateTime)
 

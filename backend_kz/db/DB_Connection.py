@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from db.DB_Models import main as dm_models_main
+from db.DB_ModelsStorage import main as dm_models_main
 
 
 class DB_Connection:
@@ -40,7 +40,7 @@ class DB_Connection:
 
         self.dbConnection = create_engine(
             "mysql+mysqlconnector://alderson:pops3@62.113.97.50:3306/tenders_master?auth_plugin=mysql_native_password",
-            pool_recycle = 3600
+            pool_recycle = 7200
         )
 
         print(dm_models_main(self.dbConnection))
@@ -62,4 +62,5 @@ class DB_Connection:
 
     def commitSession(self):
 
+        self.dbConSession.bulk_save_objects(self.dbConSessionItems)
         self.dbConSession.commit()
