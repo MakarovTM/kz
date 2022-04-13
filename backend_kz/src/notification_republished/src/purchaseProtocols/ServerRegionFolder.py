@@ -2,7 +2,7 @@ import datetime
 from tqdm import tqdm
 from modules.services_server.FTP_Server import FTP_Server
 
-from src.notification_republished.src.purchasePlanGraths.ServerRegionFolderZip import ServerRegionFolderZip
+from src.notification_republished.src.purchaseProtocols.ServerRegionFolderZip import ServerRegionFolderZip
 
 
 class ServerRegionFolder:
@@ -34,9 +34,9 @@ class ServerRegionFolder:
 		"""
 
 		if self.current_timestamp.strftime("%d") == "1":
-			return f"/fcs_regions/{self.processing_region}/plangraphs2020/prevMonth/"
+			return f"/fcs_regions/{self.processing_region}/protocols/prevMonth/"
 
-		return f"/fcs_regions/{self.processing_region}/plangraphs2020/"
+		return f"/fcs_regions/{self.processing_region}/protocols/prevMonth/"
 
 	def __to_process_server_files(self, mode = None) -> list:
 
@@ -49,7 +49,7 @@ class ServerRegionFolder:
 
 		if mode is not None:
 			return self.server_connection.listing_server_folder(
-				filter_string = "2021"
+				filter_string = "!"
 			)
 		
 		return self.server_connection.listing_server_folder()
@@ -64,7 +64,7 @@ class ServerRegionFolder:
 		"""
 
 		if self.server_connection.change_server_folder(self.__to_process_server_path()) == 0:
-			for archived in tqdm(self.__to_process_server_files(mode = 1)):
+			for archived in tqdm(self.__to_process_server_files()):
 				ServerRegionFolderZip(
 					self.server_connection.upload_server_file_in_ram(archived)
 				).run_archived_purchases_processing()

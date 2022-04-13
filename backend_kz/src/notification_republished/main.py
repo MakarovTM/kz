@@ -1,6 +1,6 @@
 from db.DB_Connection import DB_Connection
-from src.notification_republished.src.purchasePlanGraths.ServerRegionFolder import ServerRegionFolder
-
+# from src.notification_republished.src.purchasePlanGraths.ServerRegionFolder import ServerRegionFolderPG
+from src.notification_republished.src.purchaseProtocols.ServerRegionFolder import ServerRegionFolder
 
 def main():
 
@@ -15,6 +15,6 @@ def main():
         if dbConnection.makeConnectionSession() == 0:
             print("Подключение к базе данных создано")
 
+    # ServerRegionFolderPG("Moskva").run_region_folder_processing()
     ServerRegionFolder("Moskva").run_region_folder_processing()
 
-    dbConnection.commitSession()

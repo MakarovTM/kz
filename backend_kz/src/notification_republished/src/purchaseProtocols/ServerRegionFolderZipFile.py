@@ -29,30 +29,13 @@ class ServerRegionFolderZipFile:
             Автор:      Макаров Алексей
             Описание:   Выполнение извлечения данных
         """
-
-        for elem in self.purchase_file_content.createNewRootIterator("position"):
             
-            ikz = self.purchase_file_content.essenceDataWithPaths(
-                ["commonInfo/IKZ"], multi = False, element = elem
-            )
+        num = self.purchase_file_content.essenceDataWithPaths(
+            ["*/commonInfo/purchaseNumber"], multi = False
+        )
 
-            okv = self.purchase_file_content.essenceDataWithPaths(
-                [
-                    "OKPD2Info",
-                    "OKPDCode"
-                ], multi = True, element = elem
-            )
+        fcd = self.purchase_file_content.essenceDataWithPaths(
+            ["*/protocolInfo/abandonedReason/code"], multi = False
+        )
 
-            obj = self.purchase_file_content.essenceDataWithPaths(
-                ["commonInfo/purchaseObjectInfo"], multi = False, element = elem
-            )
-
-            prc = self.purchase_file_content.essenceDataWithPaths(
-                ["financeInfo/total"], multi = False, element = elem
-            )
-
-            self.dbConnection.dbConSessionItems.append(
-                RepublishedNotifications(
-                    ikz = ikz, okv = okv, obj = obj, prc = prc, crn = ikz[4:13]
-                )
-            )
+        print(num, fcd)

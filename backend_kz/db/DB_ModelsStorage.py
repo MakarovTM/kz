@@ -33,9 +33,6 @@ class RepublishedNotifications(Base):
     rid = Column(Integer, ForeignKey("republished_notifications.id"))
     pnb = Column(String(length = 20))
     pdt = Column(DateTime)
-    mrs = Column(String(length = 500))
-    cdt = Column(DateTime, default = datetime.datetime.utcnow)
-    udt = Column(DateTime)
 
 
 class ContractProjectTimeLine(Base):
@@ -56,6 +53,21 @@ class ContractProjectTimeLine(Base):
     hcl = Column(Boolean())
     hcf = Column(Boolean())
     cdt = Column(DateTime, default = datetime.datetime.utcnow)
+
+
+class PurchasesFinalProtocol(Base):
+
+    """
+        Автор:      Макаров Алексей
+        Описание:   Модель данных, описывающая
+                    информацию о статусе подведения результатов преведения закупки
+    """
+
+    __tablename__ = "purchasesFinalProtocol"
+
+    id  = Column(Integer, primary_key = True)
+    num = Column(String(length = 50), unique = True)
+    fcd = Column(String(length = 50))
 
 
 def main(db_connection) -> int:
