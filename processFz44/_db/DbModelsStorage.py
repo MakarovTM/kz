@@ -1,4 +1,3 @@
-from ast import Str
 from sqlalchemy import Column, SmallInteger
 
 from sqlalchemy import Text
@@ -15,7 +14,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
-class ContractProjectsPublished(Base):
+class ContractProjectsProtocolPublished(Base):
 
     """
         Автор:      Макаров Алексей
@@ -34,7 +33,7 @@ class ContractProjectsPublished(Base):
     supplierInn = Column(String(length = 50))
 
 
-class ContractProjectChanged(Base):
+class ContractProjectProtocolChanged(Base):
 
     """
         Автор:      Макаров Алексей
@@ -42,19 +41,38 @@ class ContractProjectChanged(Base):
                     выложенные на FTP сервер изменения в проектах контрактов
     """
 
+    __tablename__ = "сontractProjectChanged"
+
     id = Column(Integer, primary_key = True)
     contractNum = Column(String(length = 50))
     contractTsm = Column(DateTime())
     acceptedAll = Column(SmallInteger())
 
 
-class ContractProjectSigned(Base):
+class ContractProjectProtocolSigned(Base):
 
     """
         Автор:      Макаров Алексей
         Описание:   Модель данных, описывающая
                     выложенные на FTP сервер подписанные проекты контрактов
     """
+
+    __tablename__ = "сontractProjectSigned"
+
+    id = Column(Integer, primary_key = True)
+    contractNum = Column(String(length = 50))
+    contractTsm = Column(DateTime())
+
+
+class ContractProjectProtocolCancel(Base):
+
+    """
+        Автор:      Макаров Алексей
+        Описание:   Модель данных, описывающая выложенные на FTP сервер 
+                    файлы с информацией об отмене процедуры заключения контракта
+    """
+
+    __tablename__ = "сontractProjectCancel"
 
     id = Column(Integer, primary_key = True)
     contractNum = Column(String(length = 50))

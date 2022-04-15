@@ -7,29 +7,56 @@ from _db.DbModelsStorage import mainUpdateModels
 class DbConnection:
 
     """
-        Автор:      Макаров Алексей
-        Описание:   Модуль, контролирующий подключение к локальной БД
+        Автор:          Макаров Алексей
+        Описание:       Модуль, контролирующий подключение к локальной БД
     """
 
     def __init__(self) -> None:
 
         """
             Автор:      Макаров Алексей
-            Описание:   Инициализация класса по работе с БД
+            Описание:   Магический метод, выполняемый при инициализации объекта
         """
 
-        if(self.__initialized): return
-        self.__initialized = True
+        if not self.cСonstructed:
 
-        self.dbConnection = None
-        self.dbConSession = None
-        self.dbConSessionItems = []
+            self.cСonstructed = True
+
+            self.dbConnection = None
+            self.dbConSession = None
+            self.dbConSessionItems = []
     
     def __new__(cls):
-        if not hasattr(cls, 'instance'):
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Магический метод, выполняемый при создании объекта
+        """
+
+        if not hasattr(cls, "instance"):
             cls.instance = super(DbConnection, cls).__new__(cls)
-            cls.instance.__initialized = False
+            cls.instance.cСonstructed = False
+
         return cls.instance
+
+    def __del__(self) -> None:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Магический метод, выполняемый при удалении объекта
+        """
+
+        self.__deleteConnection()
+
+    def __deleteConnection(self) -> None:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Закрываем соединение с базой данных
+        """
+
+        if self.dbConnection is not None:
+            self.dbConnection.dispose()
 
     def makeConnection(self) -> int:
 
@@ -55,7 +82,6 @@ class DbConnection:
         session = sessionmaker(bind = self.dbConnection)
 
         self.dbConSession = session()
-        print(type(self.dbConSession))
 
         return 0
 

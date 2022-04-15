@@ -12,7 +12,6 @@ if __name__ == "__main__":
     a = DbConnection()
     a.makeConnection()
     a.makeConnectionSession()
-    a.updateDataBaseModels()
 
     ContractProjects().processRun()
 

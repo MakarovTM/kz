@@ -1,22 +1,23 @@
 from _db.DbConnection import DbConnection
-from _db.DbModelsStorage import ContractProjectProtocolChanged
+from _db.DbModelsStorage import ContractProjectProtocolCancel
 
 from _modules.servicesFiles.ProcessFileXml import ProcessFileXml
 
 
-class ContractProjectChanged:
+class ContractProjectCancel:
 
     """
         Автор:          Макаров Алексей
-        Описание:       Обработка файлов с изменениями проектов контрактов
+        Описание:       Обработка файлов с 
+                        информацией об отмене процедуры заключения контракта
     """
 
     def __init__(self, ramFileBuffer: bytes) -> None:
         
         """
             Автор:      Макаров Алексей
-            Описание:   Инициализация класса
-                        по обработке файла с изменениями проектов контрактов
+            Описание:   Инициализация класса по обработке файла 
+                        с информацией об отмене процедуры заключения контракта
         """
 
         self.dbConnection = DbConnection()
@@ -28,7 +29,7 @@ class ContractProjectChanged:
                 "extractionParams": {
                     "multi": None,
                     "xPath": {
-                        "parent": "cpContractProjectChange/commonInfo/number",
+                        "parent": "cpProcedureCancel/commonInfo/number",
                         "nested": None
                     },
                     "stand": "",
@@ -41,24 +42,11 @@ class ContractProjectChanged:
                 "extractionParams": {
                     "multi": None,
                     "xPath": {
-                        "parent": "cpContractProjectChange/commonInfo/publishDTInEIS",
+                        "parent": "cpProcedureCancel/commonInfo/publishDTInEIS",
                         "nested": None
                     },
                     "stand": "1970-01-01 00:00:00",
                     "shape": "IsoDateFormatter"
-                },
-                "data": ""
-            },
-
-            "acceptedAll": {
-                "extractionParams": {
-                    "multi": None,
-                    "xPath": {
-                        "parent": "cpContractProjectChange/changeInfo/totallyAccepted",
-                        "nested": None
-                    },
-                    "stand": "false",
-                    "shape": "BoolIntFormatter"
                 },
                 "data": ""
             },
@@ -85,11 +73,12 @@ class ContractProjectChanged:
             Автор:      Макаров Алексей
             Описание:   Выполнение сохранения данных в БД
         """
-
+        
         self.dbConnection.dbConSessionItems.append(
-            ContractProjectProtocolChanged(
+            ContractProjectProtocolCancel(
                 **{i: self.dataStructure[i]["data"] for i in self.dataStructure.keys()}
             )
         )
 
         return 0
+    

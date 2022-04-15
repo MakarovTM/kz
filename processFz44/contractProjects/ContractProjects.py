@@ -3,6 +3,8 @@ import datetime
 
 from tqdm import tqdm
 
+from _db.DbConnection import DbConnection
+
 from _vars.processingRegions import fz44ProcessingRegions
 
 from _modules.servicesServers.ServerViaFTP import ServerViaFTP
@@ -26,6 +28,7 @@ class ContractProjects:
             Описание:   Инициализация класса по обработке директории
         """
 
+        self.dbConnection = DbConnection()
         self.currentTimeStamp = datetime.datetime.now()
         self.toProcessRegions = fz44ProcessingRegions
         self.serverConnection = ServerViaFTP("ftp.zakupki.gov.ru", "free", "free")
@@ -60,7 +63,7 @@ class ContractProjects:
         a = self.serverConnection.inloadFolderFile(toProcessFolderFile)
         _ = ProcessFileZip(a)
         for i in _.zipFileShowStructure():
-            ProcessCpStrategics(_.readFilesIntoArchive(i), i).processData()
+            ProcessCpStrategics(_.readFilesIntoArchive(i), i).saveDataExtracted()
 
         await asyncio.sleep(0.1)
 
@@ -87,6 +90,6 @@ class ContractProjects:
 
         for processPath in tqdm(self.__processingPaths()):
             asyncio.run(self.__processFolder(processPath))
-            break
+            self.dbConnection.commitSession()
 
         return 0

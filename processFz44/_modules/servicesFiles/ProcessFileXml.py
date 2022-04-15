@@ -32,7 +32,43 @@ class ProcessFileXml:
             "IsoDateFormatter": isoDateFormatter
         }
 
+        self.dataFormatters = {
+            "IsoDateFormatter": self.__formatterIsoDate,
+            "FloatP2Formatter": self.__formatterFloatP2,
+            "BoolIntFormatter": self.__formatterBoolInt,
+        }
+
         self.__cleanUpNameSpaces()
+
+    def __formatterIsoDate(self, isoDateString: str) -> str:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Форматирование представления времени и даты 
+                        от 2022-04-11T14:13:06+07:00 в 2022-04-11 14:13:06 
+        """
+
+        return " ".join(isoDateString[:19].split("T"))
+
+    def __formatterFloatP2(self, floatNumString: str) -> str:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Форматирование числа с 
+                        точностью до двух знаков после запятой
+        """
+
+        return "{:.3f}".format(float(floatNumString))
+
+    def __formatterBoolInt(self, boolArgString: str) -> str:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Форматирование булевого выражение в строковом 
+                        формате в значение краткого числа, напр. "false" -> 0
+        """
+
+        return 0 if boolArgString == "false" else 1
 
     def __cleanUpNameSpaces(self) -> None:
 
@@ -98,3 +134,29 @@ class ProcessFileXml:
             return " ".join(set([self.formatters[shape](i) for i in essencedValues]))
 
         return "; ".join(set(essencedValues))
+
+
+    def essenceDataWithXpath(self, essenceStructure: dict, element = None) -> str:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Выполнение извлечения данных из XML - файла согласно xPath 
+        """
+
+        essencedValues = []
+        essenceElement = element if element is not None else self.fileContent
+
+        if essenceStructure["multi"] is None:
+            essencedValue = essenceElement.find(essenceStructure["xPath"]["parent"])
+            if essencedValue is None:
+                essencedValues.append(essenceStructure["stand"])
+            else:
+                essencedValues.append(essencedValue.text)
+
+        if essenceStructure["shape"] is not None:
+            essencedValues = [
+                self.dataFormatters[essenceStructure["shape"]](essencedValue) 
+                for essencedValue in essencedValues
+            ]
+
+        return "; ".join(set(list(map(str, essencedValues))))

@@ -1,5 +1,4 @@
 import io
-import asyncio
 import ftplib
 
 from _modules.servicesServers.Server import Server

@@ -1,6 +1,7 @@
-from _modules.servicesFiles.ProcessFileXml import ProcessFileXml
 from _db.DbConnection import DbConnection
-from _db.DbModelsStorage import ContractProjectsPublished
+from _db.DbModelsStorage import ContractProjectsProtocolPublished
+
+from _modules.servicesFiles.ProcessFileXml import ProcessFileXml
 
 
 class ContractProjectPublished:
@@ -19,14 +20,18 @@ class ContractProjectPublished:
         """
 
         self.dbConnection = DbConnection()
-        self.processedFile = ProcessFileXml(ramFileBuffer)
+        self.xmlModelTree = ProcessFileXml(ramFileBuffer)
 
         self.dataStructure = {
 
             "contractNum": {
                 "extractionParams": {
-                    "multi": False,
-                    "xPath": ["cpContractProject/commonInfo/number"],
+                    "multi": None,
+                    "xPath": {
+                        "parent": "cpContractProject/commonInfo/number",
+                        "nested": None
+                    },
+                    "stand": "",
                     "shape": None
                 },
                 "data": ""
@@ -34,8 +39,12 @@ class ContractProjectPublished:
 
             "contractPub": {
                 "extractionParams": {
-                    "multi": False,
-                    "xPath": ["cpContractProject/commonInfo/publishDTInEIS"],
+                    "multi": None,
+                    "xPath": {
+                        "parent": "cpContractProject/commonInfo/publishDTInEIS",
+                        "nested": None
+                    },
+                    "stand": "1970-01-01 00:00:00",
                     "shape": "IsoDateFormatter"
                 },
                 "data": ""
@@ -43,8 +52,12 @@ class ContractProjectPublished:
 
             "contractObj": {
                 "extractionParams": {
-                    "multi": False,
-                    "xPath": ["cpContractProject/contractInfo/subject"],
+                    "multi": None,
+                    "xPath": {
+                        "parent": "cpContractProject/contractInfo/subject",
+                        "nested": None
+                    },
+                    "stand": "",
                     "shape": None
                 },
                 "data": ""
@@ -52,17 +65,25 @@ class ContractProjectPublished:
 
             "contractPrc": {
                 "extractionParams": {
-                    "multi": False,
-                    "xPath": ["cpContractProject/contractInfo/price"],
-                    "shape": None
+                    "multi": None,
+                    "xPath": {
+                        "parent": "cpContractProject/contractInfo/price",
+                        "nested": None
+                    },
+                    "stand": "0.00",
+                    "shape": "FloatP2Formatter"
                 },
                 "data": ""
             },
 
             "customerInn": {
                 "extractionParams": {
-                    "multi": False,
-                    "xPath": ["cpContractProject/customerInfo/INN"],
+                    "multi": None,
+                    "xPath": {
+                        "parent": "cpContractProject/customerInfo/INN",
+                        "nested": None
+                    },
+                    "stand": "",
                     "shape": None
                 },
                 "data": ""
@@ -70,8 +91,12 @@ class ContractProjectPublished:
 
             "supplierInn": {
                 "extractionParams": {
-                    "multi": False,
-                    "xPath": ["cpContractProject/participantInfo/*/INN"],
+                    "multi": None,
+                    "xPath": {
+                        "parent": "cpContractProject/participantInfo/*/INN",
+                        "nested": None
+                    },
+                    "stand": "",
                     "shape": None
                 },
                 "data": ""
@@ -79,7 +104,7 @@ class ContractProjectPublished:
 
         }
         
-    def extractionData(self) -> None:
+    def extractionData(self) -> int:
 
         """
             Автор:      Макаров Алексей
@@ -87,14 +112,23 @@ class ContractProjectPublished:
         """
 
         for i in self.dataStructure.keys():
-            self.dataStructure[i]["data"] = self.processedFile.essenceDataWithPaths(
-                self.dataStructure[i]["extractionParams"]["xPath"], 
-                multi = self.dataStructure[i]["extractionParams"]["multi"],
-                shape = self.dataStructure[i]["extractionParams"]["shape"]
+            self.dataStructure[i]["data"] = self.xmlModelTree.essenceDataWithXpath(
+                essenceStructure = self.dataStructure[i]["extractionParams"]
             )
+
+        return 0
+
+    def saveExtractedDataIntoDb(self) -> int:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Выполнение сохранения данных в БД
+        """
         
         self.dbConnection.dbConSessionItems.append(
-            ContractProjectsPublished(
+            ContractProjectsProtocolPublished(
                 **{i: self.dataStructure[i]["data"] for i in self.dataStructure.keys()}
             )
         )
+
+        return 0
