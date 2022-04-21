@@ -1,5 +1,6 @@
-from contractProjects.ContractProjects import ContractProjects
 from _db.DbConnection import DbConnection
+from contractProjects.ContractProjects import ContractProjects
+
 
 if __name__ == "__main__":
 

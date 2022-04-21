@@ -1,5 +1,6 @@
-import asyncio
 import datetime
+import threading
+import time
 
 from tqdm import tqdm
 
@@ -33,8 +34,6 @@ class ContractProjects:
         self.toProcessRegions = fz44ProcessingRegions
         self.serverConnection = ServerViaFTP("ftp.zakupki.gov.ru", "free", "free")
 
-        self.loop = asyncio.get_event_loop()
-
         if self.serverConnection.createConnection() != 0:
             print("Ошибка создания соединения с FTP сервером")
             raise ConnectionError
@@ -53,7 +52,7 @@ class ContractProjects:
             for region in self.toProcessRegions
         ]
 
-    async def __processFolderFile(self, toProcessFolderFile: str):
+    def __processFolderFile(self, toProcessFolderFile: str):
 
         """
             Автор:      Макаров Алексей
@@ -65,21 +64,18 @@ class ContractProjects:
         for i in _.zipFileShowStructure():
             ProcessCpStrategics(_.readFilesIntoArchive(i), i).saveDataExtracted()
 
-        await asyncio.sleep(0.1)
-
-    async def __processFolder(self, toProcessFolder: str) -> int:
+    def __processFolder(self, toProcessFolder: str) -> int:
 
         """
             Автор:      Макаров Алексей
             Описание:   Запуск процесса обработки директории
         """
 
-        tasks = []
+        server = ServerViaFTP("ftp.zakupki.gov.ru", "free", "free")
 
         if self.serverConnection.changeWorkFolder(toProcessFolder) == 0:
             for i in self.serverConnection.viewOpenedFolder():
-                tasks.append(self.__processFolderFile(i))
-        await asyncio.gather(*tasks)
+                self.__processFolderFile(i)
 
     def processRun(self) -> int:
 
@@ -89,7 +85,7 @@ class ContractProjects:
         """
 
         for processPath in tqdm(self.__processingPaths()):
-            asyncio.run(self.__processFolder(processPath))
+            self.__processFolder(processPath)
             self.dbConnection.commitSession()
 
         return 0
