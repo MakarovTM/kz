@@ -66,6 +66,10 @@ class dbConnection:
         
         return 0
 
+    def commitSession(self) -> int:
+
+        self.dbConnectionSession.commit()
+
     def updateModelsStorage(self) -> int:
 
         """

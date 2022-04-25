@@ -1,11 +1,15 @@
+from cmath import nan
+from dataclasses import dataclass
+import re
 from enum import unique
+from pymysql import Date
 from sqlalchemy import Column
 
 from sqlalchemy import Text
 from sqlalchemy import Float
 from sqlalchemy import String
 from sqlalchemy import Integer, SmallInteger
-from sqlalchemy import DateTime
+from sqlalchemy import Date, DateTime
 
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.declarative import declarative_base
@@ -14,7 +18,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
-class licensesMinCulture(Base):
+class LicensesMinCulture(Base):
 
     """
         Автор:          Макаров Алексей
@@ -29,20 +33,28 @@ class licensesMinCulture(Base):
     orgName = Column(String(length = 50))
     orgInn  = Column(String(length = 30), unique = True)
     orgOgrn = Column(String(length = 50))
-    licenseFrom = Column(DateTime())
-    licenseTill = Column(DateTime())
+    licenseFrom = Column(Date())
+    licenseTill = Column(Date())
     licenseNumber = Column(String(length = 25))
 
-    @validates("licenseTill")
-    def validateLicenseFrom(self, key, licenseFrom) -> str:
+    @validates("orgOgrn", "licenseFrom", "licenseTill")
+    def validateDateField(self, key, dateFieldValue) -> str:
 
-        """
-            Автор:      Макаров Алексей
-            Описание:   Выполнение сверки формата даты перед записью в БД
-        """
+        if key == "orgOgrn":
 
-        return licenseFrom
+            if re.fullmatch(r"\d+", str(dateFieldValue)):
+                return dateFieldValue
 
+        if key == "licenseFrom" or key == "licenseFrom":
+
+            if re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z", str(dateFieldValue)):
+                return dateFieldValue[:10]
+            if re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(dateFieldValue)):
+                return dateFieldValue
+            
+            return "0000-00-00"
+
+        return ""
 
 def updateModelsStorage(dbConnection) -> int:
 
@@ -52,3 +64,5 @@ def updateModelsStorage(dbConnection) -> int:
     """
 
     Base.metadata.create_all(dbConnection)
+
+    return 0

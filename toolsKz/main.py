@@ -1,7 +1,7 @@
 import os
 import configparser
 
-from licenseMinCulture.ParsingMinCultLicenses import ParsingMinCultLicenses
+from src.licenseMinCulture.ParsingMinCultLicenses import ParsingMinCultLicenses
 
 
 if __name__ == "__main__":
