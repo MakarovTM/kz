@@ -37,20 +37,31 @@ class LicensesMinCulture(Base):
     licenseTill = Column(Date())
     licenseNumber = Column(String(length = 25))
 
-    @validates("orgOgrn", "licenseFrom", "licenseTill")
-    def validateDateField(self, key, dateFieldValue) -> str:
+    @validates("orgOgrn", "licenseFrom", "licenseTill", "orgName", "orgInn", "licenseNumber")
+    def validateDateField(self, key, dataFieldValue) -> str:
 
-        if key == "orgOgrn":
+        if key == "orgName" or key == "licenseNumber":
 
-            if re.fullmatch(r"\d+", str(dateFieldValue)):
-                return dateFieldValue
+            if len(str(dataFieldValue)) < 5:
+                return ""
+            else:
+                return dataFieldValue
+
+            return ""
+
+        if key == "orgOgrn" or key == "orgInn":
+
+            if re.fullmatch(r"\d+", str(dataFieldValue)):
+                return dataFieldValue
+
+            return ""
 
         if key == "licenseFrom" or key == "licenseFrom":
 
-            if re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z", str(dateFieldValue)):
-                return dateFieldValue[:10]
-            if re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(dateFieldValue)):
-                return dateFieldValue
+            if re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z", str(dataFieldValue)):
+                return dataFieldValue[:10]
+            if re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(dataFieldValue)):
+                return dataFieldValue
             
             return "0000-00-00"
 
