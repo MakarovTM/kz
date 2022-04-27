@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from _db.dbConnectionModels import updateModelsStorage
+from _db.dbModelsStorage import updateModelsStorage
 
 
 class dbConnection:

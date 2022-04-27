@@ -2,6 +2,7 @@ import sys
 
 from _modules.Logger import Logger
 
+from planGraphs.PlanGraphs import PlanGraphs
 from contractProjects.ContractProjects import ContractProjects
 
 
@@ -20,7 +21,8 @@ class PrimeProcessClent:
         """
 
         self.processingTools  = {
-            "-contractProjects": ContractProjects
+            "-contractProjects": ContractProjects,
+            "-planGraphs": PlanGraphs
         }
         self.processToolName  = processToolName
         self.dataProcessTool  = self.processingTools.get(self.processToolName)()

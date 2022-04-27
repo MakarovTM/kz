@@ -10,7 +10,7 @@ import threading
 
 from tqdm import tqdm
 from _db.dbConnection import dbConnection
-from _db.dbConnectionModels import LicensesMinCulture
+from _db.dbModelsStorage import LicensesMinCulture
 
 from _modules.ServerViaSsh import ServerViaSsh
 

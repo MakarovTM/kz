@@ -67,6 +67,22 @@ class LicensesMinCulture(Base):
 
         return ""
 
+
+class PostalCodes(Base):
+
+    """
+        Автор:      Макаров Алексей
+        Описание:   Модель данных, описывающая почтовые индексы РФ
+    """
+
+    __tablename__ = "postalCodes"
+
+    id = Column(Integer, primary_key = True)
+    placeIndex = Column(String(length = 50), unique = True)
+    placeCityName = Column(String(length = 100))
+    placeRegionName = Column(String(length = 100))
+
+
 def updateModelsStorage(dbConnection) -> int:
 
     """
