@@ -43,8 +43,6 @@ class ServerViaSsh(Server):
         try:
             self.serverConnection.stop()
         except Exception as e:
-            self.sysLoggerManager.logCritError(
-                f"Ошибка при разрушении подключения к серверу - {self.host}  - {str(e)}"
-            )
+            print(e)
 
         return 0
