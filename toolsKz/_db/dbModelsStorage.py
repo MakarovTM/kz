@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import re
 from enum import unique
 from pymysql import Date
-from sqlalchemy import Column
+from sqlalchemy import DATE, Column
 
 from sqlalchemy import Text
 from sqlalchemy import Float
@@ -30,15 +30,36 @@ class LicensesMinCulture(Base):
     __tablename__ = "licensesMinCulture"
 
     id = Column(Integer, primary_key = True)
-    orgName = Column(String(length = 50))
-    orgInn  = Column(String(length = 30), unique = True)
-    orgOgrn = Column(String(length = 50))
-    licenseFrom = Column(Date())
-    licenseTill = Column(Date())
-    licenseNumber = Column(String(length = 25))
+    name = Column(String(length = 500))
+    inn = Column(String(length = 30))
+    ogrn = Column(String(length = 50))
+    address = Column(String(length = 500))
+    placeName = Column(String(length = 100))
+    placeIndex = Column(String(length = 10))
+    contactEmail = Column(String(length = 100))
+    contactPhone = Column(String(length = 50))
+    contactPerson = Column(String(length = 100))
+    licenseLink = Column(String(length = 100))
+    licenseStatus = Column(SmallInteger())
+    licenseNumber = Column(String(length = 50))
+    licenseRegistered = Column(Date())
+    licenseOrderNumber = Column(Integer())
+    licenseOrderRegistered = Column(Date())
+    licenseDuplicateNumber = Column(String(length = 50))
+    licenseDuplicateRegistered = Column(Date())
+    licenseTerminationReason = Column(String(length = 50))
+    licenseTerminationRegistered = Column(Date())
+    licenseCheckReason = Column(String(length = 50))
+    licenseCheckDescription = Column(String(length = 1000))
+    possibilitiesDesignWorks = Column(SmallInteger())
+    possibilitiesEngineeringWorks = Column(SmallInteger())
 
-    @validates("orgOgrn", "licenseFrom", "licenseTill", "orgName", "orgInn", "licenseNumber")
-    def validateDateField(self, key, dataFieldValue) -> str:
+    
+
+    @validates(
+        "name", 
+    )
+    def validateField(self, key, dataFieldValue) -> str:
 
         if key == "orgName" or key == "licenseNumber":
 
