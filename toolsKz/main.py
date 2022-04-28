@@ -8,11 +8,11 @@ from src.licenseMinCulture.ParsingMinCultLicenses import ParsingMinCultLicenses
 
 if __name__ == "__main__":
 
-    # a = ParsingMinCultLicenses()
-    # a.runDataParsing()
+    a = ParsingMinCultLicenses()
+    a.runDataParsing()
 
     # a = UpdatePostalCodes()
     # a.processRun()
 
-    a = UpdateOrgsContacts()
-    a.processRun()
+    # a = UpdateOrgsContacts()
+    # a.processRun()

@@ -1,3 +1,4 @@
+import sys
 import logging
 
 
@@ -64,4 +65,5 @@ class Logger:
         """
 
         logging.critical(message)
+        sys.exit(1)
         # self.telegramBot.sendMessage(message)

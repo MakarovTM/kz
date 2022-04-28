@@ -49,12 +49,10 @@ class LicensesMinCulture(Base):
     licenseDuplicateRegistered = Column(Date())
     licenseTerminationReason = Column(String(length = 50))
     licenseTerminationRegistered = Column(Date())
-    licenseCheckReason = Column(String(length = 50))
+    licenseCheckReason = Column(String(length = 500))
     licenseCheckDescription = Column(String(length = 1000))
     possibilitiesDesignWorks = Column(SmallInteger())
     possibilitiesEngineeringWorks = Column(SmallInteger())
-
-    
 
     @validates(
         "name", 

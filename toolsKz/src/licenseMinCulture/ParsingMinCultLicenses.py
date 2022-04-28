@@ -1,18 +1,19 @@
-import os
-from pickle import NONE
-import re
 import io
-import sys
+import os
+import re
+import pandas
 import requests
-import pandas as pd
-import configparser
-import threading
 
-from tqdm import tqdm
+from pathlib import Path
+from configparser import ConfigParser
+
 from _db.dbConnection import dbConnection
 from _db.dbModelsStorage import LicensesMinCulture
 
+from _modules.Logger import Logger
 from _modules.ServerViaSsh import ServerViaSsh
+
+from src.licenseMinCulture.vars.parsingColumnNames import parsingColumnNames
 
 
 class ParsingMinCultLicenses:
@@ -31,29 +32,70 @@ class ParsingMinCultLicenses:
                         выполняемый при инициализации объекта
         """
 
-        self.iniConfigFile = configparser.ConfigParser()
-        self.iniConfigFile.read(f"{os.path.dirname(__file__)}/settings.ini")
+        self._rootPath = Path(__file__).parents[2]
+        self._dataExtracted = list()
 
-        self.serverConnection = ServerViaSsh(
-            self.iniConfigFile["sshServer"]["host"], self.iniConfigFile["sshServer"]["port"],
-            self.iniConfigFile["sshServer"]["user"], self.iniConfigFile["sshServer"]["pasw"],
-            self.iniConfigFile["sshServer"]["dbHost"], self.iniConfigFile["sshServer"]["dbPort"],
-        )
-        self.serverConnection.createConnection()
-
-        self.dbConnection = dbConnection(
-            "localhost",
-            self.serverConnection.serverConnection.local_bind_port,
-            "rosexport"
-        )
-
-        self.dbConnection.createConnection()
-        self.dbConnection.createConnectionSession()
-
-        self.dbConnection.updateModelsStorage()
+        self._logger = Logger()
+        self._config = ConfigParser()
         
+    def __readConfigFile(self) -> int:
 
-    def __checkFileLoadVersion(self) -> int:
+        """
+            Автор:      Макаров Алексей
+            Описание:   Выполнение чтения конфигурационного файла
+        """
+    
+        try:
+            self._config.read(f"{self._rootPath}/config.ini")
+        except Exception as e:
+            self._logger.logCritError(
+                f"Произошла ошибка при чтении конфигурационного файла - {str(e)}"
+            )
+
+        return 0
+
+    def __createDbServerConnection(self) -> int:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Создание подключения 
+                        с сервером, на котором расположена БД
+        """
+
+        self._dbServerConnection = ServerViaSsh(
+
+            self._config["vm20TradeServer"]["host"],
+            self._config["vm20TradeServer"]["port"],
+
+            self._config["vm20TradeServer"]["user"],
+            self._config["vm20TradeServer"]["pasw"],
+
+            self._config["vm20TradeServerDb"]["dbHost"],
+            self._config["vm20TradeServerDb"]["dbPort"],
+
+        )
+
+        return 0 if self._dbServerConnection.createConnection() == 0 else 1
+
+    def __createDbOnServerConnection(self) -> int:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Создание подключения
+                        с базой данных, расположенной на подключенном сервере
+        """
+
+        self._dbOnServerConnection = dbConnection(
+
+            self._config["vm20TradeServerLocalDb"]["dbHost"],
+            self._dbServerConnection.serverConnection.local_bind_port,
+            self._config["vm20TradeServerLocalDb"]["dbUser"],
+
+        )
+
+        return 0 if self._dbOnServerConnection.createConnection() == 0 else 1
+
+    def __processingFileCheckVersion(self) -> int:
 
         """
             Автор:      Макаров Алексей
@@ -61,27 +103,22 @@ class ParsingMinCultLicenses:
                         версии выложенного файла для парсинга данных
         """
 
-        response = requests.get(self.iniConfigFile["default"]["sourceUrl"])
-        
-        if response.status_code == 200:
-            if foundDataSetVer := re.findall(
-                self.iniConfigFile["default"]["reDataSetVer"], response.text
-            ):
-                if foundDataSetVer[0][1] == self.iniConfigFile["default"]["datasetVer"]:
-                    print("Значение не изменилось")
-                    return 1
-                else:
-                    self.foundDataSetVer = foundDataSetVer
+        try:
+            response = requests.get(self._config["licenseMinCulture"]["url"])
+            if response.status_code == 200:
+                self._publishedDataSet = re.findall(
+                    self._config["licenseMinCulture"]["reg"], response.text
+                )
             else:
-                print("Значение не найдено")
                 return 1
-        else:
-            print(f"Ошибка выполнения запроса - {response.status_code}")
-            return 1
+        except Exception as e:
+            self._logger.logCritError(
+                f"Ошибка при проверке версии файла с лицензиями мин. культуры - {str(e)}"
+            )
 
-        return 0
+        return 0 if self._config["licenseMinCulture"]["ver"] != self._publishedDataSet[0][1] else 1
 
-    def __inloadLicensesFile(self) -> int:
+    def __processingFileInload(self) -> int:
 
         """
             Автор:      Макаров Алексей
@@ -89,41 +126,46 @@ class ParsingMinCultLicenses:
                         с информацией о выданных лицензиях
         """
 
-        response = requests.get(f"{self.iniConfigFile['default']['sourceUrl']}/{self.foundDataSetVer[0][0]}.csv")
+        try:
+            response = requests.get(
+                f"{self._config['licenseMinCulture']['url']}/{self._publishedDataSet[0][0]}.csv"
+            )
+            if response.status_code == 200:
+                self._inloadedFile = response.text
+            else:
+                return 1
+        except Exception as e:
+            self._logger.logCritError(
+                f"Ошибка при попытке загрузки файла с лицензиями мин культуры - {str(e)}"
+            )
+        
+        return 0
 
-        return pd.read_csv(io.StringIO(response.text), dtype = str)[["Полное наименование", "ИНН", "OГРН/ОГРНИП", "Дата регистрации лицензии", "Дата прекращения действия лицензии", "Номер лицензии"]].values.tolist()
+    def __processingFileProduction(self) -> int:
 
-    def __saveСompanyLicenseDataRow(self, companyLicenseData: list):
+        """
+            Автор:      Макаров Алексей
+            Описание:   Выполнение извлечения 
+                        и сохранения данных в БД из загруженного файла
+        """
 
-        row = self.dbConnection.dbConnectionSession.query(LicensesMinCulture).filter_by(orgInn = companyLicenseData[1]).first()
+        licensesDf = pandas.read_csv(io.StringIO(self._inloadedFile))
 
-        if row is not None:
-            self.dbConnection.dbConnectionSession.query(LicensesMinCulture).\
-                filter(LicensesMinCulture.id == row.id).\
-                    update({
-                        "orgName": companyLicenseData[0],
-                        "orgInn": companyLicenseData[1],
-                        "orgOgrn": companyLicenseData[2],
-                        "licenseFrom": companyLicenseData[3],
-                        "licenseTill": companyLicenseData[4],
-                        "licenseNumber": companyLicenseData[5],
-                    })
-        else:
-            self.dbConnection.dbConnectionSession.add(LicensesMinCulture(
-                orgName = companyLicenseData[0],
-                orgInn = companyLicenseData[1],
-                orgOgrn = companyLicenseData[2],
-                licenseFrom = companyLicenseData[3],
-                licenseTill = companyLicenseData[4],
-                licenseNumber = companyLicenseData[5],
-            ))
+        try:
+            for licenseRow in licensesDf[
+                [i["csvColumnName"] for i in parsingColumnNames]].values.tolist():
+                    self._dataExtracted.append(
+                        {
+                            parsingColumnNames[columnIndex]["sqlColumnName"]: columnData
+                            for columnIndex, columnData in enumerate(licenseRow)
+                        }
+                    )
+        except Exception as e:
+            self._logger.logCritError(
+                f"Произошла ошибка при извлечении данных из загруженного файла - {str(e)}"
+            )
 
-    def __updateLicensesFileVersion(self):
-
-        self.iniConfigFile["default"]["datasetVer"] = self.foundDataSetVer[0][1]
-
-        with open(f"{os.path.dirname(__file__)}/settings.ini", "w") as configfile:
-            self.iniConfigFile.write(configfile)
+        return 0
 
     def runDataParsing(self) -> int:
 
@@ -133,20 +175,13 @@ class ParsingMinCultLicenses:
                         данных о лицензиях, выданных Министерством культуры
         """
 
+        if self.__readConfigFile() == 0:
+            if self.__createDbServerConnection() == 0:
+                if self.__createDbOnServerConnection() == 0:
+                    if self.__processingFileCheckVersion() == 0:
+                       if self.__processingFileInload() == 0:
+                           self.__processingFileProduction()
+                           print(self._dataExtracted)
 
-        if self.__checkFileLoadVersion() == 0:
-
-            for i in tqdm(self.__inloadLicensesFile()):
-                try:
-                    self.__saveСompanyLicenseDataRow(i)
-                except Exception as e:
-                    pass
-
-            try:
-                self.dbConnection.commitSession()
-            except Exception as e:
-                print(e)
-                pass
-            self.serverConnection.deleteConnection()
 
             # self.__updateLicensesFileVersion()
