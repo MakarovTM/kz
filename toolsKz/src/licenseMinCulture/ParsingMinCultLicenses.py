@@ -167,6 +167,35 @@ class ParsingMinCultLicenses:
 
         return 0
 
+    def __exportDataToDb(self) -> int:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Выполнение сохранения извлеченных данных в БД
+        """
+
+        for dataRow in self._dataExtracted:
+            dbRow = self.\
+                _dbOnServerConnection.\
+                    dbConnectionSession.\
+                        query(LicensesMinCulture).\
+                            filter_by(id = dataRow["id"]).\
+                                first()
+            if dbRow is None:
+                self.\
+                    _dbOnServerConnection.\
+                        dbConnectionSession.\
+                            add(**dataRow)
+            else:
+                self.\
+                    _dbOnServerConnection.\
+                        dbConnectionSession.\
+                            query(LicensesMinCulture).\
+                                filter(LicensesMinCulture.id == dataRow["id"]).\
+                                    update(**dataRow)
+
+        return 0
+
     def runDataParsing(self) -> int:
 
         """

@@ -1,15 +1,8 @@
-from cmath import nan
-from dataclasses import dataclass
-import re
-from enum import unique
-from pymysql import Date
-from sqlalchemy import DATE, Column
+from sqlalchemy import Column
 
-from sqlalchemy import Text
-from sqlalchemy import Float
 from sqlalchemy import String
 from sqlalchemy import Integer, SmallInteger
-from sqlalchemy import Date, DateTime
+from sqlalchemy import Date
 
 from sqlalchemy.orm import validates
 from sqlalchemy.ext.declarative import declarative_base
@@ -85,22 +78,6 @@ class LicensesMinCulture(Base):
             return "0000-00-00"
 
         return ""
-
-
-class PostalCodes(Base):
-
-    """
-        Автор:      Макаров Алексей
-        Описание:   Модель данных, описывающая почтовые индексы РФ
-    """
-
-    __tablename__ = "postalCodes"
-
-    id = Column(Integer, primary_key = True)
-    placeIndex = Column(String(length = 50), unique = True)
-    placeCityName = Column(String(length = 100))
-    placeRegionName = Column(String(length = 100))
-
 
 def updateModelsStorage(dbConnection) -> int:
 
