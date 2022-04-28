@@ -1,7 +1,7 @@
-parsingColumnNames = [
+columnNames = [
     {
         "csvColumnName": "Идентификатор записи реестра",
-        "sqlColumnName": "id",
+        "sqlColumnName": "licenseId",
     },
     {
         "csvColumnName": "Полное наименование",

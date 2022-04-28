@@ -4,6 +4,7 @@ import re
 import pandas
 import requests
 
+from tqdm import tqdm
 from pathlib import Path
 from configparser import ConfigParser
 
@@ -13,7 +14,7 @@ from _db.dbModelsStorage import LicensesMinCulture
 from _modules.Logger import Logger
 from _modules.ServerViaSsh import ServerViaSsh
 
-from src.licenseMinCulture.vars.parsingColumnNames import parsingColumnNames
+from src.licenseMinCulture.vars.columnNames import columnNames
 
 
 class ParsingMinCultLicenses:
@@ -93,7 +94,9 @@ class ParsingMinCultLicenses:
 
         )
 
-        return 0 if self._dbOnServerConnection.createConnection() == 0 else 1
+        self._dbOnServerConnection.createConnection()
+
+        return 0 if self._dbOnServerConnection.createConnectionSession() == 0 else 1
 
     def __processingFileCheckVersion(self) -> int:
 
@@ -149,14 +152,14 @@ class ParsingMinCultLicenses:
                         и сохранения данных в БД из загруженного файла
         """
 
-        licensesDf = pandas.read_csv(io.StringIO(self._inloadedFile))
+        licensesDf = pandas.read_csv(io.StringIO(self._inloadedFile), dtype = str)
 
         try:
             for licenseRow in licensesDf[
-                [i["csvColumnName"] for i in parsingColumnNames]].values.tolist():
+                [i["csvColumnName"] for i in columnNames]].values.tolist():
                     self._dataExtracted.append(
                         {
-                            parsingColumnNames[columnIndex]["sqlColumnName"]: columnData
+                            columnNames[columnIndex]["sqlColumnName"]: columnData
                             for columnIndex, columnData in enumerate(licenseRow)
                         }
                     )
@@ -174,24 +177,19 @@ class ParsingMinCultLicenses:
             Описание:   Выполнение сохранения извлеченных данных в БД
         """
 
-        for dataRow in self._dataExtracted:
-            dbRow = self.\
-                _dbOnServerConnection.\
-                    dbConnectionSession.\
-                        query(LicensesMinCulture).\
-                            filter_by(id = dataRow["id"]).\
-                                first()
+        for dataRow in tqdm(self._dataExtracted[:50]):
+            dbRow = self._dbOnServerConnection.dbConnectionSession.query(LicensesMinCulture).filter_by(licenseId = dataRow["licenseId"]).first()
             if dbRow is None:
                 self.\
                     _dbOnServerConnection.\
                         dbConnectionSession.\
-                            add(**dataRow)
+                            add(LicensesMinCulture(**dataRow))
             else:
                 self.\
                     _dbOnServerConnection.\
                         dbConnectionSession.\
                             query(LicensesMinCulture).\
-                                filter(LicensesMinCulture.id == dataRow["id"]).\
+                                filter(LicensesMinCulture.id == dbRow.id).\
                                     update(**dataRow)
 
         return 0
@@ -207,10 +205,12 @@ class ParsingMinCultLicenses:
         if self.__readConfigFile() == 0:
             if self.__createDbServerConnection() == 0:
                 if self.__createDbOnServerConnection() == 0:
+                    self._dbOnServerConnection.updateModelsStorage()
                     if self.__processingFileCheckVersion() == 0:
                        if self.__processingFileInload() == 0:
                            self.__processingFileProduction()
-                           print(self._dataExtracted)
+                           self.__exportDataToDb()
+        self._dbOnServerConnection.commitSession()
 
 
             # self.__updateLicensesFileVersion()
