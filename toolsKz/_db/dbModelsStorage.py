@@ -39,8 +39,7 @@ class LicensesMinCulture(Base):
 
     __tablename__ = "licensesMinCulture"
 
-    id = Column(Integer, primary_key = True)
-    licenseId = Column(Integer, unique = True)
+    licenseId = Column(Integer, primary_key = True)
     name = Column(String(length = 500))                     # ln: 74
     inn = Column(String(length = 30))                       # ln: 79
     ogrn = Column(String(length = 30))                      # ln: 79
@@ -64,8 +63,8 @@ class LicensesMinCulture(Base):
     licenseCheckDescription = Column(String(length = 1000)) # ln: 74
     possibilitiesDesignWorks = Column(SmallInteger())       # ln: 96
     possibilitiesEngineeringWorks = Column(SmallInteger())  # ln: 96
-
-    @validates("name", "address", "licenseLink", "licenseNumber", "licenseDuplicateNumber", "licenseTerminationReason", "licenseCheckDescription","inn", "ogrn", "licenseStatus", "licenseOrderNumber", "licenseCheckReason", "possibilitiesDesignWorks", "possibilitiesEngineeringWorks", "licenseRegistered", "licenseOrderRegistered", "licenseDuplicateRegistered", "licenseTerminationRegistered")
+        
+    @validates("name", "address", "licenseLink", "licenseNumber", "licenseDuplicateNumber", "licenseTerminationReason", "licenseCheckDescription", "inn", "ogrn", "licenseStatus", "licenseOrderNumber", "licenseCheckReason", "possibilitiesDesignWorks", "possibilitiesEngineeringWorks", "licenseRegistered", "licenseOrderRegistered", "licenseDuplicateRegistered", "licenseTerminationRegistered")
     def validateColumnValue(self, columnName, columnValue):
 
         """
@@ -111,11 +110,10 @@ class LicensesMinCulture(Base):
                 if re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(columnValue)):
                     return columnValue
                 return "0000-00-00"
-            
-
 
 
 @event.listens_for(LicensesMinCulture, "before_insert")
+@event.listens_for(LicensesMinCulture, "before_update")
 def setPostalIndex(mapper, connection, target):
 
     """
@@ -134,6 +132,7 @@ def setPostalIndex(mapper, connection, target):
 
 
 @event.listens_for(LicensesMinCulture, "before_insert")
+@event.listens_for(LicensesMinCulture, "before_update")
 def setPlaceName(mapper, connection, target):
 
     """
@@ -156,6 +155,7 @@ def setPlaceName(mapper, connection, target):
 
 
 @event.listens_for(LicensesMinCulture, "before_insert")
+@event.listens_for(LicensesMinCulture, "before_update")
 def setOrgContacts(mapper, connection, target):
 
     """

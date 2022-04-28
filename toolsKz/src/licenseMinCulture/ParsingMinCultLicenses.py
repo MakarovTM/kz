@@ -177,20 +177,27 @@ class ParsingMinCultLicenses:
             Описание:   Выполнение сохранения извлеченных данных в БД
         """
 
-        for dataRow in tqdm(self._dataExtracted[:50]):
-            dbRow = self._dbOnServerConnection.dbConnectionSession.query(LicensesMinCulture).filter_by(licenseId = dataRow["licenseId"]).first()
-            if dbRow is None:
-                self.\
-                    _dbOnServerConnection.\
-                        dbConnectionSession.\
-                            add(LicensesMinCulture(**dataRow))
-            else:
+        for dataRow in tqdm(self._dataExtracted):
+
+            dbRow = self.\
+                _dbOnServerConnection.\
+                    dbConnectionSession.\
+                        query(LicensesMinCulture).\
+                            filter_by(licenseId = dataRow["licenseId"]).\
+                                first()
+
+            if dbRow is not None:
                 self.\
                     _dbOnServerConnection.\
                         dbConnectionSession.\
                             query(LicensesMinCulture).\
-                                filter(LicensesMinCulture.id == dbRow.id).\
-                                    update(**dataRow)
+                                filter(LicensesMinCulture.licenseId == dbRow.licenseId).\
+                                    delete()
+
+            self.\
+                _dbOnServerConnection.\
+                    dbConnectionSession.\
+                        add(LicensesMinCulture(**dataRow))
 
         return 0
 
