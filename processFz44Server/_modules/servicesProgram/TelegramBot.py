@@ -14,8 +14,8 @@ class TelegramBot:
             Автор:      Макаров Алексей
             Описание:   Магический метод, выполняемый при инициализации объекта
         """
-        
-        self.chatId   = "1807778017"
+
+        self.chatId = "1807778017"
         self.botToken = "5313812895:AAFQy83OUL4asqFpJrJMbrT7P6GN99hpRAE"
 
     def sendMessage(self, message: str) -> int:

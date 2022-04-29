@@ -2,7 +2,7 @@ from re import match
 from io import BytesIO
 from zipfile import ZipFile
 
-from _modules.servicesProgram.Logger import Logger
+from _modules.servicesProgram.ProgramLogger import ProgramLogger
 
 
 class ProcessFileZip:
@@ -24,8 +24,17 @@ class ProcessFileZip:
                         }
         """
 
-        self._logger = Logger()
+        self._logger = ProgramLogger()
         self._zipFileContent = ZipFile(zipFileContent)
+
+    def __del__(self) -> None:
+
+        """
+            Автор     : Макаров Алексей
+            Описание  : Деструктор класса при окончании работы с файлом
+        """
+
+        self._zipFileContent.close()
 
     def showStructureOfZip(self, fileNameMask: str) -> list:
 
@@ -76,7 +85,7 @@ class ProcessFileZip:
         try:
             return self._zipFileContent.read(fileName)
         except Exception as e:
-            self._logger.logCritError(
+            self._logger.logError(
                 f"Ошибка при попытке чтения файла в архиве - {str(e)}"
             )
 
