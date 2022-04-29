@@ -1,6 +1,6 @@
 import sys
 
-from _modules.Logger import Logger
+from _modules.servicesProgram.ProgramLogger import ProgramLogger
 
 from planGraphs.PlanGraphs import PlanGraphs
 from contractProjects.ContractProjects import ContractProjects
@@ -27,7 +27,7 @@ class PrimeProcessClent:
         self.processToolName  = processToolName
         self.dataProcessTool  = self.processingTools.get(self.processToolName)()
 
-        self.sysLoggerManager = Logger()
+        self.sysLoggerManager = ProgramLogger()
 
     def processRunManager(self) -> None:
 
@@ -54,4 +54,4 @@ if __name__ == "__main__":
         processTool = PrimeProcessClent(sys.argv[1])
         processTool.processRunManager()
     else:
-        Logger().logCritError("При запуске передано неизвестное кол - во аргументов")
+        ProgramLogger().logError("При запуске передано неизвестное кол - во аргументов")

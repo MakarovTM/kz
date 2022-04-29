@@ -1,4 +1,4 @@
-from _modules.Logger import Logger
+from _modules.servicesProgram.ProgramLogger import ProgramLogger
 
 
 class Server:
@@ -21,7 +21,7 @@ class Server:
         self.pasw = pasw
 
         self.serverConnection = None
-        self.sysLoggerManager = Logger()
+        self.sysLoggerManager = ProgramLogger()
 
     def createConnection(self) -> int:
 

@@ -1,5 +1,6 @@
-from _modules.Logger import Logger
 from _vars.processingRegions import fz44ProcessingRegions
+
+from _modules.servicesProgram.ProgramLogger import ProgramLogger
 
 from planGraphs.src.PlanGraphsProcessRegion import PlanGraphsProcessRegion
 
@@ -19,7 +20,7 @@ class PlanGraphs:
             Описание:   Магический метод, выполняемый при инициализации объекта
         """
 
-        self.logger = Logger()
+        self.logger = ProgramLogger()
 
     def processRun(self) -> int:
 

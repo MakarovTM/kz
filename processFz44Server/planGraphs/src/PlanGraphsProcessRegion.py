@@ -1,7 +1,7 @@
 import datetime
 
-from _modules.Logger import Logger
-from _modules.ServerViaFTP import ServerViaFTP
+from _modules.servicesServer.ServerViaFTP import ServerViaFTP
+from _modules.servicesProgram.ProgramLogger import ProgramLogger
 
 
 class PlanGraphsProcessRegion:
@@ -22,7 +22,7 @@ class PlanGraphsProcessRegion:
         self.processingRegion = processRegion
         self._currentTimeStamp = datetime.datetime.now()
 
-        self.logger = Logger()
+        self.logger = ProgramLogger()
         self.zakupkiServerConnection = ServerViaFTP("ftp.zakupki.gov.ru", "free", "free")
 
     def __processingZakupkiServerFolderName(self) -> str:

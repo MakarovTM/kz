@@ -1,5 +1,8 @@
 import requests
 
+from pathlib import Path
+from configparser import ConfigParser
+
 
 class TelegramBot:
 
@@ -15,22 +18,38 @@ class TelegramBot:
             Описание:   Магический метод, выполняемый при инициализации объекта
         """
 
-        self.chatId = "1807778017"
-        self.botToken = "5313812895:AAFQy83OUL4asqFpJrJMbrT7P6GN99hpRAE"
+        self._config = ConfigParser()
+        self._config.read(f"{Path(__file__).parents[2]}/config.ini")
 
     def sendMessage(self, message: str) -> int:
 
         """
-            Автор:      Макаров Алексей
-            Описание:   Выполнение отправки сообщения в чат
+            Автор     : Макаров Алексей
+            Описание  : Выполнение отправки сообщения в чат
+            Получаем  : {
+                            varType: Str,
+                            varName: message,
+                            varDesc: Сообщение для отправки в телеграм чат
+                        }
+            Возвращем : {
+                            varType: Int,
+                            varDesc: 0 - Сообщение успешно отправлено
+                                     1 - Ошибка при отправке сообщения
+                        }
         """
 
-        sendMessageUrl = "https://api.telegram.org/bot{}/sendMessage?chat_id={}&text={}".format(
-            self.botToken, self.chatId, message
-        )
-
         try:
-            sendMessageResponseCode = requests.get(sendMessageUrl).status_code
-            return 0 if sendMessageResponseCode == 200 else 1
+            if requests.get(
+                "https://api.telegram.org/bot{}/sendMessage".format(
+                    self._config["telegramBot"]["botToken"]
+                ),
+                params={
+                    "text": message,
+                    "chat_id": self._config["telegramBot"]["chatId"],
+                }
+            ).status_code != 200:
+                return 1
         except Exception:
-            return 2
+            return 1
+
+        return 0

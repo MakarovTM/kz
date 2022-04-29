@@ -1,7 +1,7 @@
 import datetime
 
-from _modules.Logger import Logger
-from _modules.serviceServers.ServerViaFTP import ServerViaFTP
+from _modules.servicesServer.ServerViaFTP import ServerViaFTP
+from _modules.servicesProgram.ProgramLogger import ProgramLogger
 
 
 class ContractProjectsProcessRegion:

@@ -1,7 +1,7 @@
 from io import BytesIO
 import ftplib
 
-from _modules.serviceServers.Server import Server
+from _modules.servicesServer.Server import Server
 
 
 class ServerViaFTP(Server):
