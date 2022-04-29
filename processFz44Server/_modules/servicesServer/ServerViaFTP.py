@@ -1,22 +1,22 @@
+from io import BytesIO
 import ftplib
 
-from _modules.Server import Server
+from _modules.serviceServers.Server import Server
 
 
 class ServerViaFTP(Server):
 
     """
         Автор:          Макаров Алексей
-        Описание:       Модуль по работе 
+        Описание:       Модуль по работе
                         с удаленным сервером через протокол FTP
     """
 
     def createConnection(self) -> int:
-        
 
         """
             Автор:      Макаров Алексей
-            Описание:   Создание подключения 
+            Описание:   Создание подключения
                         с удаленным сервером через протокол FTP
         """
 
@@ -31,12 +31,12 @@ class ServerViaFTP(Server):
             return 1
 
         return 0
-    
+
     def deleteConnection(self) -> int:
-        
+
         """
             Автор:      Макаров Алексей
-            Описание:   Разрыв подключения 
+            Описание:   Разрыв подключения
                         с удаленным сервером через протокол FTP
         """
 
@@ -77,10 +77,10 @@ class ServerViaFTP(Server):
                 "Смена активной директории невозможна, тк не было создано подключение"
             )
             return 2
-        
+
         return 0
 
-    def browseProcessPath(self) -> list:
+    def browseProcessPath(self, filterString: str) -> list:
 
         """
             Автор:      Макаров Алексей
@@ -89,10 +89,43 @@ class ServerViaFTP(Server):
         """
 
         if self.serverConnection is not None:
-            return self.serverConnection.nlst()
+            if filterString is None:
+                return self.serverConnection.nlst()
+            else:
+                return [i for i in self.serverConnection.nlst() if i in filterString]
         else:
             self.sysLoggerManager.logCritError(
                 "Просмотр активной директории невозможен, тк не было создано подключение"
             )
 
         return []
+
+    def uploadFileInRam(self, toUploadFileName: str) -> BytesIO:
+
+        """
+            Автор     :     Макаров Алексей
+            Описание  :     Выполнение загрузки файла,
+                            расположенного на FTP сервере в память устройства
+            Принимаем : {
+                            varType: str,
+                            varName: toUploadFileName,
+                            varDesc: Наименование файла для загрузки
+                        }
+            Возвращаем: {
+                            varType: BytesIO,
+                            varName: ramFileBuffer,
+                            varDesc: Буфер байтов в памяти, содержимое файла
+                        }
+        """
+
+        ramFileBuffer = BytesIO()
+
+        if self.serverConnection is None:
+            self.sysLoggerManager.logCritError(
+                "Отсутсвует активное соединение с сервером для загрузки файла"
+            )
+        else:
+            self.serverConnection.retrbinary(
+                f"RETR {toUploadFileName}", ramFileBuffer.write)
+
+        return ramFileBuffer

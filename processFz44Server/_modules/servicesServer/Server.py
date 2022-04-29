@@ -29,7 +29,7 @@ class Server:
             Автор:      Макаров Алексей
             Описание:   Создание подключения с удаленным сервером
         """
-    
+
         raise NotImplementedError
 
     def deleteConnection(self) -> int:
@@ -57,4 +57,4 @@ class Server:
             Описание:   Просмотр директории на удаленном сервере
         """
 
-        raise NotImplemented
+        raise NotImplementedError

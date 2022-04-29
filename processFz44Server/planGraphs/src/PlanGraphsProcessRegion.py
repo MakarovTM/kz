@@ -20,6 +20,7 @@ class PlanGraphsProcessRegion:
         """
 
         self.processingRegion = processRegion
+        self._currentTimeStamp = datetime.datetime.now()
 
         self.logger = Logger()
         self.zakupkiServerConnection = ServerViaFTP("ftp.zakupki.gov.ru", "free", "free")
@@ -35,11 +36,11 @@ class PlanGraphsProcessRegion:
         """
 
         if datetime.datetime.now().strftime("%d") == "1":
-            return f"/fcs_regions/{self.processRegion}/contractprojects/prevMonth/"
+            return f"/fcs_regions/{self.processingRegion}/plangraphs2020/prevMonth/"
 
-        return f"/fcs_regions/{self.processRegion}/contractprojects/currMonth/"
+        return f"/fcs_regions/{self.processingRegion}/plangraphs2020/currMonth/"
 
-    def __makeZakupkiServerConnection(self) -> int:
+    def __createZakupkiServerConnection(self) -> int:
 
         """
             Автор:      Макаров Алексей
@@ -51,8 +52,34 @@ class PlanGraphsProcessRegion:
 
         if self.zakupkiServerConnection.createConnection() == 1:
             self.logger.logCritError(
-                f"Creating connection to process folder {self.__processingZakupkiServerFolderName()} failed"
+                f"Ошибка подключения к серверу для обработки директории {self.__processingZakupkiServerFolderName()}"
             )
+
+        return 0
+
+    def __processingZakupkiServerFolderFile(self, zipFileName: str) -> int:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Выполнение обработки файла,
+                        содержащего план. графики предстоящих закупок
+        """
+
+        self.zakupkiServerConnection.uploadFileInRam(zipFileName)
+
+    def __processingZakupkiServerFolder(self) -> int:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Выполнение исследования
+                        директории с план. графиками закупок
+            Возвращаем: 0 - int - Просмотр
+        """
+
+        if self.zakupkiServerConnection.changeProcessPath(
+            self.__processingZakupkiServerFolderName()) == 0:
+
+                print(self.zakupkiServerConnection.browseProcessPath())
 
         return 0
 
@@ -60,10 +87,11 @@ class PlanGraphsProcessRegion:
 
         """
             Автор:      Макаров Алексей
-            Описание:   Запуск процесса обработки директории 
+            Описание:   Запуск процесса обработки директории
                         региона с файлами, содержащими планы проведения закупок
         """
 
-        self.__makeZakupkiServerConnection()
+        self.__createZakupkiServerConnection()
+        self.__processingZakupkiServerFolder()
 
         return 0
