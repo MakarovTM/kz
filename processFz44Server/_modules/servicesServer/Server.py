@@ -8,7 +8,7 @@ class Server:
         Описание:       Модуль по работе с удаленным сервером
     """
 
-    def __init__(self, host: str, user: str, pasw: str) -> None:
+    def __init__(self, host: str, user: str, pasw: str, port: int) -> None:
 
         """
             Автор:      Макаров Алексей
@@ -16,27 +16,19 @@ class Server:
                         выполняемый при создании объекта
         """
 
-        self.host = host
-        self.user = user
-        self.pasw = pasw
+        self._host = host
+        self._port = port
+        self._user = user
+        self._pasw = pasw
+        self._serverConnection = None
 
-        self.serverConnection = None
-        self.sysLoggerManager = ProgramLogger()
+        self._logger = ProgramLogger()
 
     def createConnection(self) -> int:
 
         """
             Автор:      Макаров Алексей
             Описание:   Создание подключения с удаленным сервером
-        """
-
-        raise NotImplementedError
-
-    def deleteConnection(self) -> int:
-
-        """
-            Автор:      Макаров Алексей
-            Описание:   Удаление подключения с удаленным сервером
         """
 
         raise NotImplementedError

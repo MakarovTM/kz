@@ -1,5 +1,6 @@
+from re import match
 from io import BytesIO
-import ftplib
+from ftplib import FTP
 
 from _modules.servicesServer.Server import Server
 
@@ -15,88 +16,91 @@ class ServerViaFTP(Server):
     def createConnection(self) -> int:
 
         """
-            Автор:      Макаров Алексей
-            Описание:   Создание подключения
+            Автор     : Макаров Алексей
+            Описание  : Создание подключения
                         с удаленным сервером через протокол FTP
+            Возвращем : {
+                            varType: Int,
+                            varDesc: 0 - Соединение было успешно создано
+                        }
         """
 
         try:
-            self.serverConnection = ftplib.FTP(
-                host = self.host, user = self.user, passwd = self.pasw, timeout = 10
+            self._serverConnection = FTP(
+                host=self._host, port=self._port, user=self._user,
+                passwd=self._pasw, timeout=10
             )
         except Exception as e:
-            self.sysLoggerManager.logCritError(
-                f"Произошла ошибка при создании подключения с FTP сервером - {str(e)}"
+            self._logger.logError(
+                f"Ошибка создания соед. с сервером {self._host} - {str(e)}"
             )
-            return 1
-
-        return 0
-
-    def deleteConnection(self) -> int:
-
-        """
-            Автор:      Макаров Алексей
-            Описание:   Разрыв подключения
-                        с удаленным сервером через протокол FTP
-        """
-
-        if self.serverConnection is not None:
-            try:
-                self.serverConnection.quit()
-            except Exception as e:
-                self.sysLoggerManager.logError(
-                    f"Произошла ошибка при разрыве подключения с сервером - {str(e)}"
-                )
-                return 1
-        else:
-            self.sysLoggerManager.logCritError(
-                "Соединение не было создано для его посл. разрыва"
-            )
-            return 2
 
         return 0
 
     def changeProcessPath(self, newProcessPath: str) -> int:
 
         """
-            Автор:      Макаров Алексей
-            Описание:   Выполнение смены
+            Автор     : Макаров Алексей
+            Описание  : Выполнение смены
                         активной директории на удаленном сервере
+            Принимаем : {
+                            varType: Str,
+                            varName: newProcessPath,
+                            varDesc: Абсолютный путь для смены
+                                     текущего рабочего каталога на сервере
+                        }
+            Возвращем : {
+                            varType: Int,
+                            varDesc: 0 - Соединение было успешно создано
+                        }
         """
 
-        if self.serverConnection is not None:
-            try:
-                self.serverConnection.cwd(newProcessPath)
-            except Exception as e:
-                self.sysLoggerManager.logError(
-                    f"Произошла ошибка при смене директории на сервере - {str(e)}"
-                )
-                return 1
-        else:
-            self.sysLoggerManager.logCritError(
-                "Смена активной директории невозможна, тк не было создано подключение"
+        if self._serverConnection is None:
+            self._logger.logError(
+                "Смена рабочего каталога невозможна из-за отсутвия подключения"
             )
-            return 2
+        else:
+            try:
+                self._serverConnection.cwd(newProcessPath)
+            except Exception:
+                self._logger.logError(
+                    "Для смены рабочего каталога был передан неизвестный путь"
+                )
 
         return 0
 
-    def browseProcessPath(self, filterString: str) -> list:
+    def browseProcessPath(self, fileNameMask: str) -> list:
 
         """
-            Автор:      Макаров Алексей
-            Описание:   Выполнение просмотра
-                        активной директории на удаленном сервере
+            Автор     : Макаров Алексей
+            Описание  : Выполнение просмотра
+                        содержимого рабочего каталога на сервере
+            Принимаем : {
+                            varType: Str,
+                            varName: filterString,
+                            varDesc: Шаблон регулярного выражения
+                        }
+            Возвращем : {
+                            varType: List,
+                            varDesc: Список файлов в рабочем каталоге,
+                                     наименование которых удоволетв. шаблону
+                        }
         """
 
-        if self.serverConnection is not None:
-            if filterString is None:
-                return self.serverConnection.nlst()
-            else:
-                return [i for i in self.serverConnection.nlst() if i in filterString]
+        if self._serverConnection is None:
+            self._logger.logError(
+                "Просмотр директории невозможен, тк соединения не существует")
         else:
-            self.sysLoggerManager.logCritError(
-                "Просмотр активной директории невозможен, тк не было создано подключение"
-            )
+
+            containedFileNames = self._serverConnection.nlst()
+
+            if fileNameMask is not None:
+                return [
+                    i
+                    for i in containedFileNames if match(f"{fileNameMask}", i)
+                ]
+
+            return containedFileNames
 
         return []
 
