@@ -4,7 +4,7 @@ from pathlib import Path
 from configparser import ConfigParser
 
 
-class TelegramBot:
+class ProgramTelegramBot:
 
     """
         Автор:          Макаров Алексей
