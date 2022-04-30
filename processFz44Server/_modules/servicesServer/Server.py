@@ -1,3 +1,5 @@
+from io import BytesIO
+
 from _modules.servicesProgram.ProgramLogger import ProgramLogger
 
 
@@ -20,6 +22,7 @@ class Server:
         self._port = port
         self._user = user
         self._pasw = pasw
+
         self._serverConnection = None
 
         self._logger = ProgramLogger()
@@ -47,6 +50,16 @@ class Server:
         """
             Автор:      Макаров Алексей
             Описание:   Просмотр директории на удаленном сервере
+        """
+
+        raise NotImplementedError
+
+    def uploadFileInRam(self, toUploadFileName: str) -> BytesIO:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Выполнение загрузки файла, расположенного
+                        на FTP сервере в оперативную память устрайства
         """
 
         raise NotImplementedError

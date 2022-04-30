@@ -1,7 +1,7 @@
 import sys
 import logging
 
-from _modules.servicesProgram.TelegramBot import TelegramBot
+from _modules.servicesProgram.ProgramTelegramBot import TelegramBot
 
 
 class ProgramLogger:
