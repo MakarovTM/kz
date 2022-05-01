@@ -1,18 +1,18 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from _db.DbModelsStorage import mainUpdateModels
-
 
 class DbConnection:
 
     """
         Автор:          Макаров Алексей
-        Описание:       Програмный модуль, 
+        Описание:       Програмный модуль,
                         контролирующий работу с базой данных
     """
 
-    def __init__(self) -> None:
+    def __init__(
+            self,
+            host: str, port: int, user: str, pasw: str, dbName: str) -> None:
 
         """
             Автор:      Макаров Алексей
@@ -22,12 +22,17 @@ class DbConnection:
 
         if not self.cСonstructed:
 
+            self._host = host
+            self._port = port
+            self._user = user
+            self._pasw = pasw
+            self._dbName = dbName
+
             self.cСonstructed = True
 
-            self.dbConnection = None
-            self.dbConSession = None
-            self.dbConSessionItems = []
-    
+            self._dbConnection = None
+            self.dbConnectionSession = None
+
     def __new__(cls):
 
         """
@@ -41,66 +46,33 @@ class DbConnection:
 
         return cls.instance
 
-    def __del__(self) -> None:
+    def createDbConnection(self) -> int:
 
         """
             Автор:      Макаров Алексей
-            Описание:   Магический метод, выполняемый при удалении объекта
+            Описание:   Создание подключения к БД
         """
 
-        self.__deleteConnection()
-
-    def __deleteConnection(self) -> None:
-
-        """
-            Автор:      Макаров Алексей
-            Описание:   Закрываем соединение с базой данных
-        """
-
-        if self.dbConnection is not None:
-            self.dbConnection.dispose()
-
-    def makeConnection(self) -> int:
-
-        """
-            Автор:      Макаров Алексей
-            Описание:   Создание соединения с БД
-        """
-
-        self.dbConnection = create_engine(
-            "mysql+pymysql://makarov:makarov@62.113.97.50:3306/fz44",
-            pool_recycle = 7200
-        )
+        try:
+            self._dbConnection = create_engine(
+                "mysql+pymysql://{}:{}@{}:{}/{}".format(
+                    self._user, self._pasw,
+                    self._host, self._port, self._dbName
+                ),
+                pool_recycle=3600
+            )
+            self.dbConnectionSession = sessionmaker(bind=self._dbConnection)()
+        except Exception as e:
+            print(e)
+            return 1
 
         return 0
 
-    def makeConnectionSession(self) -> int:
+    def commitDbConnectionSession(self):
 
         """
             Автор:      Макаров Алексей
-            Описание:   Создание сессии подключения к базе данных
+            Описание:   Выполнение сохранения данных в БД
         """
 
-        session = sessionmaker(bind = self.dbConnection)
-
-        self.dbConSession = session()
-
-        return 0
-
-    def commitSession(self):
-
-        self.dbConSession.bulk_save_objects(self.dbConSessionItems)
-        self.dbConSession.commit()
-
-
-    def updateDataBaseModels(self) -> int:
-
-        """
-            Автор:      Макаров Алексей
-            Описание:   Обновления структуры базы данных
-        """
-
-        if mainUpdateModels(self.dbConnection) == 0:
-            print("Структура базы данных успешно обновлена")
-
-        return 0
+        self.dbConnectionSession.commit()
