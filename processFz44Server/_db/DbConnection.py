@@ -1,6 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from _db.DbModelsStorage import updateDbStructure
+
 
 class DbConnection:
 
@@ -12,7 +14,7 @@ class DbConnection:
 
     def __init__(
             self,
-            host: str, port: int, user: str, pasw: str, dbName: str) -> None:
+            host: str, port: str, user: str, pasw: str, dbName: str) -> None:
 
         """
             Автор:      Макаров Алексей
@@ -33,7 +35,7 @@ class DbConnection:
             self._dbConnection = None
             self.dbConnectionSession = None
 
-    def __new__(cls):
+    def __new__(cls, *args):
 
         """
             Автор:      Макаров Алексей
@@ -61,7 +63,8 @@ class DbConnection:
                 ),
                 pool_recycle=3600
             )
-            self.dbConnectionSession = sessionmaker(bind=self._dbConnection)()
+            session = sessionmaker(bind=self._dbConnection)
+            self.dbConnectionSession = session()
         except Exception as e:
             print(e)
             return 1
@@ -76,3 +79,13 @@ class DbConnection:
         """
 
         self.dbConnectionSession.commit()
+
+    def updateDbModelStorage(self) -> int:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Выполнение обновление структуры БД
+        """
+
+        if updateDbStructure(self._dbConnection) == 0:
+            print("Струтура базы данных обновлена")

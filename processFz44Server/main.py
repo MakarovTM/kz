@@ -1,45 +1,4 @@
-import sys
-
-from _modules.servicesProgram.ProgramLogger import ProgramLogger
-
-from planGraphs.PlanGraphs import PlanGraphs
-from contractProjects.ContractProjects import ContractProjects
-
-
-class PrimeProcessClent:
-
-    """
-        Автор:          Макаров Алексей
-        Описание:       Управление инструментами для обработки данных
-    """
-
-    def __init__(self, processToolName: str) -> None:
-
-        """
-            Автор:      Макаров Алексей
-            Описание:   Магический метод, выполняемый при инициализации объекта
-        """
-
-        self.processingTools  = {
-            "-contractProjects": ContractProjects,
-            "-planGraphs": PlanGraphs
-        }
-        self.processToolName  = processToolName
-        self.dataProcessTool  = self.processingTools.get(self.processToolName)()
-
-        self.sysLoggerManager = ProgramLogger()
-
-    def processRunManager(self) -> None:
-
-        """
-            Автор:      Макаров Алексей
-            Описание:   Выполнение запуска инструмента для обработки данных
-        """
-
-        if self.dataProcessTool is not None:
-            self.dataProcessTool.processRun()
-        else:
-            self.sysLoggerManager.logCritError("При запуске передан неизвестный аргумент")
+from src.ProcessingFolder import ProcessingFolder
 
 
 if __name__ == "__main__":
@@ -50,8 +9,4 @@ if __name__ == "__main__":
                     файлов с информацией о закупках по 44 ФЗ
     """
 
-    if len(sys.argv) == 2:
-        processTool = PrimeProcessClent(sys.argv[1])
-        processTool.processRunManager()
-    else:
-        ProgramLogger().logError("При запуске передано неизвестное кол - во аргументов")
+    ProcessingFolder("plangraphs2020").runProcessingFolder()

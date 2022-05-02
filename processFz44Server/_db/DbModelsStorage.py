@@ -2,8 +2,10 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+from _db.modelStorage.ZakupkiFilesProcessingStatus import ZakupkiFilesProcessingStatus
 
-def updateDbStructure(dbConnection):
+
+def updateDbStructure(dbConnection) -> int:
 
     """
         Автор:      Макаров Алексей
@@ -11,3 +13,5 @@ def updateDbStructure(dbConnection):
     """
 
     Base.metadata.create_all(dbConnection)
+
+    return 0

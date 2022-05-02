@@ -1,7 +1,7 @@
 import sys
 import logging
 
-from _modules.servicesProgram.ProgramTelegramBot import TelegramBot
+from _modules.servicesProgram.ProgramTelegramBot import ProgramTelegramBot
 
 
 class ProgramLogger:
@@ -19,7 +19,7 @@ class ProgramLogger:
                          выполняемый при инициализации объекта
         """
 
-        self._telegramBot = TelegramBot()
+        self._telegramBot = ProgramTelegramBot()
 
         logging.basicConfig(
             level=logging.INFO,
@@ -52,6 +52,6 @@ class ProgramLogger:
                         }
         """
 
-        logging.error(message)
+        logging.error(f"{message} - выполнение остановлено")
         self._telegramBot.sendMessage(f"{message} - выполнение остановлено")
         sys.exit(1)

@@ -27,8 +27,7 @@ class ServerViaFTP(Server):
 
         try:
             self._serverConnection = FTP(
-                host=self._host, port=self._port, user=self._user,
-                passwd=self._pasw, timeout=10
+                host=self._host, user=self._user, passwd=self._pasw, timeout=10
             )
         except Exception as e:
             self._logger.logError(

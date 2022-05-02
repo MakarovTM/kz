@@ -10,7 +10,7 @@ class Server:
         Описание:       Модуль по работе с удаленным сервером
     """
 
-    def __init__(self, host: str, user: str, pasw: str, port: int) -> None:
+    def __init__(self, host: str, port: str, user: str, pasw: str) -> None:
 
         """
             Автор:      Макаров Алексей
