@@ -26,7 +26,7 @@ class TenderPlan2020:
         self._essenceDataStructure = {
             "config": {
                 "stacked": True,
-                "stackedRoot": "tenderPlan2020/positions",
+                "stackedRoot": "/export/tenderPlan2020/positions/position",
             },
             "ikz": {
                 "multi": False,

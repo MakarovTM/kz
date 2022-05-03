@@ -1,7 +1,6 @@
 import sys
 from io import BytesIO
 from lxml import etree
-from sqlalchemy import except_all
 
 from _modules.servicesProgram.ProgramLogger import ProgramLogger
 
@@ -33,7 +32,8 @@ class ProcessFileXml:
                 self._logger.logError(
                     "Произошла ошибка при удалении пространства имен"
                 )
-        except Exception:
+        except Exception as e:
+            print(e)
             self._logger.logError(
                 "При инициализации класса был передан некорректный файл"
             )
@@ -45,9 +45,8 @@ class ProcessFileXml:
             Описание  : Удаление пространства имён из .xml файла
         """
 
-        for elem in self._fileContent.getiterator():
-            elem.tag = etree.QName(elem).localname
-        etree.cleanup_namespaces(self._fileContent)
+        for elem in self._fileContent.iter():
+            print(ET.QName(elem))
 
         return 0
 
@@ -61,7 +60,7 @@ class ProcessFileXml:
 
         return [
             newRoot
-            for newRoot in self._fileContent.find(newRootIterator)
+            for newRoot in self._fileContent.iter(newRootIterator)
         ]
 
     def essenceDataWithXpath(self, essenceStructure: dict) -> str:
@@ -113,47 +112,4 @@ class ProcessFileXml:
                         }
         """
 
-        def essenceDataFromRoot(essenceDataRoot) -> dict:
-
-            """
-                Автор:          Макаров Алексей
-                Описание:       Выполнение извлечения
-                                данных из корневого элемента
-            """
-
-            def essenceDataValue(essenceNewSubRoot, essenceSubSwitch):
-
-                essencedValue = essenceNewSubRoot.find(essenceSubSwitch)
-
-                return None if essencedValue is None else essencedValue.text
-
-            for essenceSwitch in list(essenceStructure.keys())[1:]:
-                if essenceStructure[essenceSwitch]["multi"]:
-                    _ = essenceDataRoot.find(essenceStructure[essenceSwitch]["xPath"]["parent"])
-                    if _ is not None:
-                        a = []
-                        for newSubRoot in _:
-                            if newSubRoot.tag == essenceStructure[essenceSwitch]["xPath"]["nested"]:
-                                a.append(newSubRoot.text)
-                        print(a)
-                    else:
-                        print("ОКВЭД не указаны")
-                else:
-                    print(essenceDataValue(essenceDataRoot, essenceStructure[essenceSwitch]["xPath"]["parent"]))
-
-        try:
-            rootElements = self.__createNewRootIterator(
-                essenceStructure["config"]["stackedRoot"]
-            ) if essenceStructure["config"]["stacked"] else [self._fileContent]
-
-            for i in rootElements:
-                try:
-                    essenceDataFromRoot(i)
-                except Exception as e:
-                    print(etree.tostring(self._fileContent).decode())
-                    print(e)
-                    sys.exit(0)
-        except:
-           
-           pass
-            
+        pass
