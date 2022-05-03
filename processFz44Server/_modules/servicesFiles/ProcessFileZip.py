@@ -36,7 +36,7 @@ class ProcessFileZip:
 
         self._zipFileContent.close()
 
-    def showStructureOfZip(self, fileNameMask: str) -> list:
+    def showStructureOfZip(self, fileNameMask=None) -> list:
 
         """
             Автор     : Макаров Алексей

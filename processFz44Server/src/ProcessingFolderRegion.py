@@ -5,7 +5,10 @@ from _db.DbConnection import DbConnection
 from _db.modelStorage.ZakupkiFilesProcessingStatus import ZakupkiFilesProcessingStatus
 
 from _modules.servicesServer.ServerViaFTP import ServerViaFTP
+from _modules.servicesFiles.ProcessFileZip import ProcessFileZip
 from _modules.servicesProgram.ProgramLogger import ProgramLogger
+
+from src.ProcessingFolderRegionFileStrategics import ProcessingFolderRegionFileStrategics
 
 
 class ProcessingFolderRegion:
@@ -45,14 +48,40 @@ class ProcessingFolderRegion:
 
         self._processingServerPath = processingServerPath
 
-    def __toProcessFilesList(self) -> list:
+    def __processFolder(self) -> int:
 
         """
             Автор:      Макаров Алексей
-            Описание:   Получение списка файлов для последующей обработки
+            Описание:   Выполнение обработки директории
         """
 
-        return []
+        if self._serverConnection.\
+                changeProcessPath(self._processingServerPath) == 0:
+            for toProcessFile in self._serverConnection.browseProcessPath():
+                self.__processFolderFile(toProcessFile)
+
+    def __processFolderFile(self, toProcessFile: str) -> int:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Выполнение обработки файла внутри директории
+        """
+
+        processingZipFile = ProcessFileZip(
+            self._serverConnection.uploadFileInRam(toProcessFile)
+        )
+
+        for i in processingZipFile.showStructureOfZip(".*.xml"):
+            ProcessingFolderRegionFileStrategics(i, processingZipFile.readZipFileContent(i))
+
+    def __processFolderFileFinished(self, toProcessFileId: int) -> int:
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Сохранение отметки об успешно обработакнном файле
+        """
+
+        pass
 
     def runProcessFolderRegion(self) -> int:
 
@@ -60,5 +89,9 @@ class ProcessingFolderRegion:
             Автор:      Макаров Алексей
             Описание:   Запуск процесса обработки директории с файлами
         """
+
+        if self._serverConnection.createConnection() == 0:
+            if self._dbConnection.createDbConnection() == 0:
+                self.__processFolder()
 
         return 0

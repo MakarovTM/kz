@@ -33,7 +33,7 @@ class ProcessingFolder:
         """
 
         processingInternalFolder = "prevMonth" \
-            if datetime.now().strftime("%d") == "1" else "currMonth"
+            if datetime.now().strftime("%d") == "1" else "prevMonth"
 
         return [
             "/fcs_regions/{}/{}/{}/".format(
@@ -50,5 +50,6 @@ class ProcessingFolder:
         """
 
         for processingServerPath in tqdm(self.__processingRegionFolderNames()):
-            ProcessingFolderRegion(processingServerPath)
+            ProcessingFolderRegion(
+                processingServerPath).runProcessFolderRegion()
             break

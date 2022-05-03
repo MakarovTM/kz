@@ -68,7 +68,7 @@ class ServerViaFTP(Server):
 
         return 0
 
-    def browseProcessPath(self, fileNameMask: str) -> list:
+    def browseProcessPath(self, fileNameMask=None) -> list:
 
         """
             Автор     : Макаров Алексей
@@ -123,12 +123,12 @@ class ServerViaFTP(Server):
 
         ramFileBuffer = BytesIO()
 
-        if self.serverConnection is None:
+        if self._serverConnection is None:
             self.sysLoggerManager.logCritError(
                 "Отсутсвует активное соединение с сервером для загрузки файла"
             )
         else:
-            self.serverConnection.retrbinary(
+            self._serverConnection.retrbinary(
                 f"RETR {toUploadFileName}", ramFileBuffer.write)
 
         return ramFileBuffer

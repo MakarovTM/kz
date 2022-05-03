@@ -1,4 +1,7 @@
+import sys
+from io import BytesIO
 from lxml import etree
+from sqlalchemy import except_all
 
 from _modules.servicesProgram.ProgramLogger import ProgramLogger
 
@@ -10,7 +13,7 @@ class ProcessFileXml:
         Описание:   Модуль по работе с файлами, им. расш. *.xml
     """
 
-    def __init__(self, xmlFileContent: bytes) -> None:
+    def __init__(self, xmlFileContent: BytesIO) -> None:
 
         """
             Автор     : Макаров Алексей
@@ -43,12 +46,23 @@ class ProcessFileXml:
         """
 
         for elem in self._fileContent.getiterator():
-            if not isinstance(
-                    elem, (etree._Comment, etree._ProcessingInstruction)):
-                elem.tag = etree.QName(elem).localname
+            elem.tag = etree.QName(elem).localname
         etree.cleanup_namespaces(self._fileContent)
 
         return 0
+
+    def __createNewRootIterator(self, newRootIterator: str):
+
+        """
+            Автор:      Макаров Алексей
+            Описание:   Создание итератора дерева XML
+                        файла с переданным элементов в качестве корня
+        """
+
+        return [
+            newRoot
+            for newRoot in self._fileContent.find(newRootIterator)
+        ]
 
     def essenceDataWithXpath(self, essenceStructure: dict) -> str:
 
@@ -62,6 +76,7 @@ class ProcessFileXml:
                             varDesc:    Структура,
                                         описывающая извлекаемые данные
                             varTree:    {
+
                                             varType:    Bool,
                                             varName:    multi,
                                             varDesc:    Искомое значение
@@ -89,6 +104,7 @@ class ProcessFileXml:
                                             varName:    default,
                                             varDesc:    Значение для
                                                         узла по умолчанию
+
                                         }
                         }
             Возвращаем: {
@@ -97,14 +113,47 @@ class ProcessFileXml:
                         }
         """
 
-        essencedValues = []
+        def essenceDataFromRoot(essenceDataRoot) -> dict:
 
-        if not essenceStructure["multi"]:
-            essencedElem = self.\
-                _fileContent.find(essenceStructure["xPath"]["parent"])
-            if essencedElem is not None:
-                essencedValues.append(essencedElem.text)
-            else:
-                essencedValues.append(essenceStructure["default"])
+            """
+                Автор:          Макаров Алексей
+                Описание:       Выполнение извлечения
+                                данных из корневого элемента
+            """
 
-        return "; ".join(set(list(map(str, essencedValues))))
+            def essenceDataValue(essenceNewSubRoot, essenceSubSwitch):
+
+                essencedValue = essenceNewSubRoot.find(essenceSubSwitch)
+
+                return None if essencedValue is None else essencedValue.text
+
+            for essenceSwitch in list(essenceStructure.keys())[1:]:
+                if essenceStructure[essenceSwitch]["multi"]:
+                    _ = essenceDataRoot.find(essenceStructure[essenceSwitch]["xPath"]["parent"])
+                    if _ is not None:
+                        a = []
+                        for newSubRoot in _:
+                            if newSubRoot.tag == essenceStructure[essenceSwitch]["xPath"]["nested"]:
+                                a.append(newSubRoot.text)
+                        print(a)
+                    else:
+                        print("ОКВЭД не указаны")
+                else:
+                    print(essenceDataValue(essenceDataRoot, essenceStructure[essenceSwitch]["xPath"]["parent"]))
+
+        try:
+            rootElements = self.__createNewRootIterator(
+                essenceStructure["config"]["stackedRoot"]
+            ) if essenceStructure["config"]["stacked"] else [self._fileContent]
+
+            for i in rootElements:
+                try:
+                    essenceDataFromRoot(i)
+                except Exception as e:
+                    print(etree.tostring(self._fileContent).decode())
+                    print(e)
+                    sys.exit(0)
+        except:
+           
+           pass
+            
