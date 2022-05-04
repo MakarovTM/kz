@@ -3,10 +3,10 @@ from io import BytesIO
 from _modules.servicesFiles.ProcessFileXml import ProcessFileXml
 
 from _db.DbConnection import DbConnection
-from _db.modelStorage.EpNotifications import EpNotifications
+from _db.modelStorage.PurchaseNotifications import PurchaseNotifications
 
 
-class EpNotification:
+class EpNotificationsEF2020:
 
     """
         Автор:          Макаров Алексей
@@ -101,6 +101,18 @@ class EpNotification:
 
         for epNotificationData in self.\
                 _processingFile.essenceDataWithXpath(self._dataStructure):
-            self._dbConnection.dbConnectionSession.add(
-                EpNotifications(**epNotificationData)
-            )
+
+            dbRow = self._dbConnection.dbConnectionSession.\
+                    query(PurchaseNotifications).\
+                    filter_by(purchaseNum=epNotificationData["purchaseNum"]).\
+                    first()
+
+            if dbRow is not None:
+                self._dbConnection.dbConnectionSession.\
+                    query(PurchaseNotifications).\
+                    filter(PurchaseNotifications.id == dbRow.id).\
+                    update(epNotificationData)
+            else:
+                self._dbConnection.\
+                    dbConnectionSession.add(
+                        PurchaseNotifications(**epNotificationData))

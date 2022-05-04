@@ -1,4 +1,3 @@
-import sys
 import logging
 
 from _modules.servicesProgram.ProgramTelegramBot import ProgramTelegramBot
@@ -53,5 +52,4 @@ class ProgramLogger:
         """
 
         logging.error(f"{message} - выполнение остановлено")
-        self._telegramBot.sendMessage(f"{message} - выполнение остановлено")
-        sys.exit(1)
+        # self._telegramBot.sendMessage(f"{message} - выполнение остановлено")

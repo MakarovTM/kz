@@ -1,14 +1,11 @@
-from pathlib import Path
-from configparser import ConfigParser
-
 from _db.DbConnection import DbConnection
-from _db.modelStorage.ZakupkiFilesProcessingStatus import ZakupkiFilesProcessingStatus
 
 from _modules.servicesServer.ServerViaFTP import ServerViaFTP
 from _modules.servicesFiles.ProcessFileZip import ProcessFileZip
 from _modules.servicesProgram.ProgramLogger import ProgramLogger
+from _modules.servicesProgram.ProgramConfig import ProgramConfig
 
-from src.ProcessingFolderRegionFileStrategics import ProcessingFolderRegionFileStrategics
+from src.ProcessingFolderStrategics import ProcessingFolderStrategics
 
 
 class ProcessingFolderRegion:
@@ -26,23 +23,19 @@ class ProcessingFolderRegion:
                         выполняемый при инициализации класса
         """
 
-        self._config = ConfigParser()
-        self._config.read(f"{Path(__file__).parents[1]}/config.ini")
+        self._processingServerPath = processingServerPath
 
+        self._config = ProgramConfig()
         self._logger = ProgramLogger()
 
-        self._dbConnection = DbConnection(
-            "kzRemoteDataBase"
-        )
+        self._dbConnection = DbConnection("kzRemoteDataBase")
 
         self._serverConnection = ServerViaFTP(
-            self._config["zakupkiGovServer"]["host"],
-            self._config["zakupkiGovServer"]["port"],
-            self._config["zakupkiGovServer"]["user"],
-            self._config["zakupkiGovServer"]["pasw"]
+            self._config.config["zakupkiGovServer"]["host"],
+            self._config.config["zakupkiGovServer"]["port"],
+            self._config.config["zakupkiGovServer"]["user"],
+            self._config.config["zakupkiGovServer"]["pasw"]
         )
-
-        self._processingServerPath = processingServerPath
 
     def __processFolder(self) -> int:
 
@@ -54,7 +47,20 @@ class ProcessingFolderRegion:
         if self._serverConnection.\
                 changeProcessPath(self._processingServerPath) == 0:
             for toProcessFile in self._serverConnection.browseProcessPath():
-                self.__processFolderFile(toProcessFile)
+                if self.__processFolderFile(toProcessFile) == 0:
+                    self._logger.logInfo(
+                        f"Запуск процесса обработки файла {toProcessFile}"
+                    )
+                else:
+                    self._logger.logError(
+                        f"Обработка файла {toProcessFile} завершена с ошибкой"
+                    )
+        else:
+            self._logger.logError(
+                f"Ошибка при смене каталога {self._processingServerPath}"
+            )
+
+        return 0
 
     def __processFolderFile(self, toProcessFile: str) -> int:
 
@@ -67,17 +73,14 @@ class ProcessingFolderRegion:
             self._serverConnection.uploadFileInRam(toProcessFile)
         )
 
-        for i in processingZipFile.showStructureOfZip(".*.xml"):
-            ProcessingFolderRegionFileStrategics(i, processingZipFile.readZipFileContent(i)).saveEssencedData()
+        for inZipFileName in processingZipFile.showStructureOfZip(".*.xml"):
+            ProcessingFolderStrategics(
+                inZipFileName,
+                processingZipFile.readZipFileContent(inZipFileName)
+            ).saveEssencedData()
+            self._dbConnection.commitDbConnectionSession()
 
-    def __processFolderFileFinished(self, toProcessFileId: int) -> int:
-
-        """
-            Автор:      Макаров Алексей
-            Описание:   Сохранение отметки об успешно обработакнном файле
-        """
-
-        pass
+        return 0
 
     def runProcessFolderRegion(self) -> int:
 
@@ -88,8 +91,12 @@ class ProcessingFolderRegion:
 
         if self._serverConnection.createConnection() == 0:
             if self._dbConnection.createDbConnection() == 0:
-                self.__processFolder()
-        print("here")
-        self._dbConnection.commitDbConnectionSession()
+                if self.__processFolder() == 0:
+                    self._logger.logInfo(
+                        f"""
+                            Обработка каталога
+                            {self._processingServerPath} завершена успешно
+                        """
+                    )
 
         return 0

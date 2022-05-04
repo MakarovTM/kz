@@ -45,7 +45,8 @@ class ProcessFileXml:
         """
 
         for elem in self._fileContent.getiterator():
-            if not isinstance(elem, (etree._Comment, etree._ProcessingInstruction)):
+            if not isinstance(
+                    elem, (etree._Comment, etree._ProcessingInstruction)):
                 elem.tag = etree.QName(elem).localname
         etree.cleanup_namespaces(self._fileContent)
 

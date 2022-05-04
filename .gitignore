@@ -160,3 +160,26 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+docs/
+
+processFz44Server/config.ini
+
+processFz44Server/.vscode
+
+processFz44Server/src/__pycache__
+
+processFz44Server/src/protocols/__pycache__
+
+processFz44Server/src/notifications/__pycache__
+
+processFz44Server/vars/__pycache__
+
+processFz44Server/_modules/__pycache__
+
+processFz44Server/_modules/servicesFiles/__pycache__
+processFz44Server/_modules/servicesProgram/__pycache__
+processFz44Server/_modules/servicesServer/__pycache__
+
+processFz44Server/_db/__pycache__
+processFz44Server/_db/modelStorage/__pycache__
