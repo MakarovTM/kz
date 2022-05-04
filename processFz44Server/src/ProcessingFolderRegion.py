@@ -32,11 +32,7 @@ class ProcessingFolderRegion:
         self._logger = ProgramLogger()
 
         self._dbConnection = DbConnection(
-            self._config["kzRemoteDataBase"]["host"],
-            self._config["kzRemoteDataBase"]["port"],
-            self._config["kzRemoteDataBase"]["user"],
-            self._config["kzRemoteDataBase"]["pasw"],
-            self._config["kzRemoteDataBase"]["dbName"],
+            "kzRemoteDataBase"
         )
 
         self._serverConnection = ServerViaFTP(
@@ -72,7 +68,7 @@ class ProcessingFolderRegion:
         )
 
         for i in processingZipFile.showStructureOfZip(".*.xml"):
-            ProcessingFolderRegionFileStrategics(i, processingZipFile.readZipFileContent(i))
+            ProcessingFolderRegionFileStrategics(i, processingZipFile.readZipFileContent(i)).saveEssencedData()
 
     def __processFolderFileFinished(self, toProcessFileId: int) -> int:
 
@@ -93,5 +89,7 @@ class ProcessingFolderRegion:
         if self._serverConnection.createConnection() == 0:
             if self._dbConnection.createDbConnection() == 0:
                 self.__processFolder()
+        print("here")
+        self._dbConnection.commitDbConnectionSession()
 
         return 0

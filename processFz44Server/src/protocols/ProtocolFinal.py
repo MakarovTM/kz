@@ -3,15 +3,15 @@ from io import BytesIO
 from _modules.servicesFiles.ProcessFileXml import ProcessFileXml
 
 from _db.DbConnection import DbConnection
-from _db.modelStorage.PlanGraphs import PlanGraphs
+from _db.modelStorage.PurchaseProtocolFinal import PurchaseProtocolFinal
 
 
-class TenderPlan2020:
+class ProtocolFinal:
 
     """
         Автор:          Макаров Алексей
         Описание:       Выполнение обработки файлов, содержащих
-                        информацию о планировании проведения процедур закупок
+                        информацию о результате проведения закупочной процедуры
     """
 
     def __init__(self, ramFileBuffer: BytesIO) -> None:
@@ -25,32 +25,25 @@ class TenderPlan2020:
         self._dbConnection = DbConnection("kzRemoteDataBase")
         self._processingFile = ProcessFileXml(ramFileBuffer)
 
-        self._essenceDataStructure = {
+        self._dataStructure = {
             "config": {
-                "stacked": True,
-                "stackedRoot": "./tenderPlan2020/positions/position",
+                "stacked": False,
+                "stackedRoot": None
             },
-            "purchaseIkz": {
+            "purchaseNum": {
                 "multi": False,
                 "xPath": {
-                    "parent": "./commonInfo/IKZ",
+                    "parent": "./*/commonInfo/purchaseNumber",
                     "nested": None
                 }
             },
-            "purchaseObj": {
+            "purchaseReasonAbandoned": {
                 "multi": False,
                 "xPath": {
-                    "parent": "./commonInfo/purchaseObjectInfo",
+                    "parent": "./*/protocolInfo/abandonedReason/code",
                     "nested": None
                 }
             },
-            "purchasePrc": {
-                "multi": False,
-                "xPath": {
-                    "parent": "./financeInfo/total",
-                    "nested": None
-                }
-            }
         }
 
     def showEssencedData(self) -> None:
@@ -73,7 +66,8 @@ class TenderPlan2020:
             Описание:   Выполнение сохранения данных в БД
         """
 
-        for newTenderPlanRow in self._processingFile.essenceDataWithXpath(self._essenceDataStructure):
+        for purchaseProtocolData in self.\
+                _processingFile.essenceDataWithXpath(self._dataStructure):
             self._dbConnection.dbConnectionSession.add(
-                PlanGraphs(**newTenderPlanRow)
+                PurchaseProtocolFinal(**purchaseProtocolData)
             )

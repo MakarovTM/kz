@@ -1,4 +1,3 @@
-import sys
 from io import BytesIO
 from lxml import etree
 
@@ -45,23 +44,12 @@ class ProcessFileXml:
             Описание  : Удаление пространства имён из .xml файла
         """
 
-        for elem in self._fileContent.iter():
-            print(ET.QName(elem))
+        for elem in self._fileContent.getiterator():
+            if not isinstance(elem, (etree._Comment, etree._ProcessingInstruction)):
+                elem.tag = etree.QName(elem).localname
+        etree.cleanup_namespaces(self._fileContent)
 
         return 0
-
-    def __createNewRootIterator(self, newRootIterator: str):
-
-        """
-            Автор:      Макаров Алексей
-            Описание:   Создание итератора дерева XML
-                        файла с переданным элементов в качестве корня
-        """
-
-        return [
-            newRoot
-            for newRoot in self._fileContent.iter(newRootIterator)
-        ]
 
     def essenceDataWithXpath(self, essenceStructure: dict) -> str:
 
@@ -112,4 +100,41 @@ class ProcessFileXml:
                         }
         """
 
-        pass
+        def essenceDataFromSubRoot(essenceNewRoot, essenceNewSwitch):
+
+            """
+                Автор:      Макаров Алексей
+                Описание:   Выполнение извлечения
+                            данных из созданного ключевого элемента
+            """
+
+            if essenceNewSwitch["multi"]:
+                pass
+            else:
+                essencedValue = essenceNewRoot.xpath(
+                                        essenceNewSwitch["xPath"]["parent"])
+                if len(essencedValue) == 0:
+                    return ""
+                else:
+                    return essencedValue[0].text
+
+        if essenceStructure["config"]["stacked"]:
+            return [
+                {
+                    essenceSwitch:
+                    essenceDataFromSubRoot(
+                        newSubRootIterator, essenceStructure[essenceSwitch]
+                    ) for essenceSwitch in list(essenceStructure.keys())[1:]
+                }
+                for newSubRootIterator in self._fileContent.xpath(
+                                    essenceStructure["config"]["stackedRoot"])
+            ]
+        else:
+            return [
+                {
+                    essenceSwitch:
+                    essenceDataFromSubRoot(
+                        self._fileContent, essenceStructure[essenceSwitch]
+                    ) for essenceSwitch in list(essenceStructure.keys())[1:]
+                }
+            ]

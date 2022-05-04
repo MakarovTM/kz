@@ -1,6 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from pathlib import Path
+from configparser import ConfigParser
+
 from _db.DbModelsStorage import updateDbStructure
 
 
@@ -12,9 +15,7 @@ class DbConnection:
                         контролирующий работу с базой данных
     """
 
-    def __init__(
-            self,
-            host: str, port: str, user: str, pasw: str, dbName: str) -> None:
+    def __init__(self, dbName: str) -> None:
 
         """
             Автор:      Макаров Алексей
@@ -24,11 +25,14 @@ class DbConnection:
 
         if not self.cСonstructed:
 
-            self._host = host
-            self._port = port
-            self._user = user
-            self._pasw = pasw
-            self._dbName = dbName
+            self._config = ConfigParser()
+            self._config.read(f"{Path(__file__).parents[1]}/config.ini")
+
+            self._host = self._config[dbName]["host"]
+            self._port = self._config[dbName]["port"]
+            self._user = self._config[dbName]["user"]
+            self._pasw = self._config[dbName]["pasw"]
+            self._dbName = self._config[dbName]["dbName"]
 
             self.cСonstructed = True
 
@@ -65,6 +69,7 @@ class DbConnection:
             )
             session = sessionmaker(bind=self._dbConnection)
             self.dbConnectionSession = session()
+            self.updateDbModelStorage()
         except Exception as e:
             print(e)
             return 1

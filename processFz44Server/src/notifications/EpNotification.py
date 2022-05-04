@@ -3,10 +3,10 @@ from io import BytesIO
 from _modules.servicesFiles.ProcessFileXml import ProcessFileXml
 
 from _db.DbConnection import DbConnection
-from _db.modelStorage.PlanGraphs import PlanGraphs
+from _db.modelStorage.EpNotifications import EpNotifications
 
 
-class TenderPlan2020:
+class EpNotification:
 
     """
         Автор:          Макаров Алексей
@@ -25,32 +25,60 @@ class TenderPlan2020:
         self._dbConnection = DbConnection("kzRemoteDataBase")
         self._processingFile = ProcessFileXml(ramFileBuffer)
 
-        self._essenceDataStructure = {
+        self._dataStructure = {
             "config": {
-                "stacked": True,
-                "stackedRoot": "./tenderPlan2020/positions/position",
+                "stacked": False,
+                "stackedRoot": None
             },
-            "purchaseIkz": {
+            "purchaseNum": {
                 "multi": False,
                 "xPath": {
-                    "parent": "./commonInfo/IKZ",
+                    "parent": "./*/commonInfo/purchaseNumber",
+                    "nested": None
+                }
+            },
+            "publishedEIS": {
+                "multi": False,
+                "xPath": {
+                    "parent": "./*/commonInfo/publishDTInEIS",
                     "nested": None
                 }
             },
             "purchaseObj": {
                 "multi": False,
                 "xPath": {
-                    "parent": "./commonInfo/purchaseObjectInfo",
+                    "parent": "./*/commonInfo/purchaseObjectInfo",
                     "nested": None
                 }
             },
             "purchasePrc": {
                 "multi": False,
                 "xPath": {
-                    "parent": "./financeInfo/total",
+                    "parent": "./*/*/*/maxPriceInfo/maxPrice",
                     "nested": None
                 }
-            }
+            },
+            "placingFrom": {
+                "multi": False,
+                "xPath": {
+                    "parent": "./*/*/procedureInfo/collectingInfo/startDT",
+                    "nested": None
+                }
+            },
+            "placingTill": {
+                "multi": False,
+                "xPath": {
+                    "parent": "./*/*/procedureInfo/collectingInfo/endDT",
+                    "nested": None
+                }
+            },
+            "purchaseIkz": {
+                "multi": False,
+                "xPath": {
+                    "parent": "./*/*/*/*/*/IKZInfo/purchaseCode",
+                    "nested": None
+                }
+            },
         }
 
     def showEssencedData(self) -> None:
@@ -61,19 +89,18 @@ class TenderPlan2020:
         """
 
         print(
-            self._processingFile.essenceDataWithXpath(
-                self._essenceDataStructure
-            )
+            self._processingFile.essenceDataWithXpath(self._dataStructure)
         )
 
-    def saveEssencedDataToDb(self) -> int:
+    def saveEssencedDataToDb(self) -> None:
 
         """
             Автор:      Макаров Алексей
-            Описание:   Выполнение сохранения данных в БД
+            Описание:   Сохранение извлеченных данных
         """
 
-        for newTenderPlanRow in self._processingFile.essenceDataWithXpath(self._essenceDataStructure):
+        for epNotificationData in self.\
+                _processingFile.essenceDataWithXpath(self._dataStructure):
             self._dbConnection.dbConnectionSession.add(
-                PlanGraphs(**newTenderPlanRow)
+                EpNotifications(**epNotificationData)
             )
