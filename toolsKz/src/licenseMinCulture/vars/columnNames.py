@@ -54,19 +54,19 @@ columnNames = [
     {
         "csvColumnName": "Иные сведения",
         "sqlColumnName": "licenseCheckDescription"
-    },  
+    },
     {
         "csvColumnName": "ОЛД_Разработка проектной документации по консервации, ремонту, реставрации, приспособлению и воссозданию объектов культурного наследия (памятников истории и культуры) народов Российской Федерации",
         "sqlColumnName": "possibilitiesDesignWorks"
-    },  
+    },
     {
         "csvColumnName": "ОЛД_Разработка проектной документации по инженерному укреплению объектов культурного наследия (памятников истории и культуры) народов Российской Федерации",
         "sqlColumnName": "possibilitiesEngineeringWorks"
-    },  
+    },
     {
         "csvColumnName": "Адрес",
         "sqlColumnName": "address"
-    },  
+    },
     {
         "csvColumnName": "код статуса",
         "sqlColumnName": "licenseStatus"

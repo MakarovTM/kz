@@ -22,7 +22,7 @@ class PurchaseNotifications(Base):
                         об осуществлении проведения процедуры закупки
     """
 
-    __tablename__ = "purchaseNotifications"
+    __tablename__ = "fz44PurchaseNotifications"
 
     id = Column(Integer, primary_key=True)
     purchaseNum = Column(String(length=50), unique=True)
@@ -32,7 +32,7 @@ class PurchaseNotifications(Base):
     placingTill = Column(Date())
     customerInn = Column(String(length=30))
     purchaseIkz = Column(String(length=50))
-    referenceTo = Column(Integer, ForeignKey("purchaseNotifications.id"))
+    referenceTo = Column(Integer, ForeignKey("fz44PurchaseNotifications.id"))
     publishedEIS = Column(Date())
     similarScore = Column(Integer)
 

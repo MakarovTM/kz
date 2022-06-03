@@ -2,6 +2,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+from _db.modelStorage.UnscheduledChecks import UnscheduledChecks
+from _db.modelStorage.ProcessingFileStatus import ProcessingFileStatus
 from _db.modelStorage.PurchaseNotifications import PurchaseNotifications
 from _db.modelStorage.PurchaseProtocolsFinal import PurchaseProtocolsFinal
 

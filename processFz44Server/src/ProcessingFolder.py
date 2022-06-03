@@ -1,4 +1,3 @@
-from tqdm import tqdm
 from datetime import datetime
 
 from src.ProcessingFolderRegion import ProcessingFolderRegion
@@ -32,15 +31,12 @@ class ProcessingFolder:
                         для обработки файлов, содержащихся в ней
         """
 
-        processingInternalFolder = "prevMonth" \
-            if datetime.now().strftime("%d") == "1" else "prevMonth"
-
-        return [
-            "/fcs_regions/{}/{}/{}/".format(
-                processingRegionFolder,
-                self._processingFolder, processingInternalFolder
-            ) for processingRegionFolder in self._fz44ProcessingRegions
-        ]
+        if self._processingFolder == "fcs_fas":
+            return [
+                "/fcs_fas/unplannedCheck/{}".format(
+                    "prevMonth" if datetime.now().strftime("%d") == "1" else "currMonth"
+                )
+            ]
 
     def runProcessingFolder(self) -> int:
 
@@ -49,7 +45,7 @@ class ProcessingFolder:
             Описание:   Запуск процесса обработки данных
         """
 
-        for processingServerPath in tqdm(self.__processingRegionFolderNames()):
+        for processingServerPath in self.__processingRegionFolderNames():
             ProcessingFolderRegion(
-                processingServerPath).runProcessFolderRegion()
-            break
+                processingServerPath
+            ).runProcessFolderRegion()

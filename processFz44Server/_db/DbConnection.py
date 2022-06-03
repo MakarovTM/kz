@@ -1,8 +1,6 @@
+from venv import create
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-from pathlib import Path
-from configparser import ConfigParser
 
 from _db.DbModelsStorage import updateDbStructure
 
@@ -15,7 +13,11 @@ class DbConnection:
                         контролирующий работу с базой данных
     """
 
-    def __init__(self, dbName: str) -> None:
+    def __init__(
+        self,
+        dbHost: str, dbPort: int, dbUser: str, dbName: str,
+        dbPasw=None
+    ) -> None:
 
         """
             Автор:      Макаров Алексей
@@ -23,23 +25,20 @@ class DbConnection:
                         выполняемый при инициализации объекта
         """
 
-        if not self.cСonstructed:
+        if self.cСonstructed:
 
-            self._config = ConfigParser()
-            self._config.read(f"{Path(__file__).parents[1]}/config.ini")
-
-            self._host = self._config[dbName]["host"]
-            self._port = self._config[dbName]["port"]
-            self._user = self._config[dbName]["user"]
-            self._pasw = self._config[dbName]["pasw"]
-            self._dbName = self._config[dbName]["dbName"]
+            self._host = dbHost
+            self._port = dbPort
+            self._user = dbUser
+            self._pasw = dbPasw
+            self._dbName = dbName
 
             self.cСonstructed = True
 
             self._dbConnection = None
             self.dbConnectionSession = None
 
-    def __new__(cls, *args):
+    def __new__(cls, *args, **kwargs):
 
         """
             Автор:      Макаров Алексей
@@ -48,7 +47,7 @@ class DbConnection:
 
         if not hasattr(cls, "instance"):
             cls.instance = super(DbConnection, cls).__new__(cls)
-            cls.instance.cСonstructed = False
+            cls.instance.cСonstructed = True
 
         return cls.instance
 
@@ -60,13 +59,18 @@ class DbConnection:
         """
 
         try:
-            self._dbConnection = create_engine(
-                "mysql+pymysql://{}:{}@{}:{}/{}".format(
-                    self._user, self._pasw,
-                    self._host, self._port, self._dbName
-                ),
-                pool_recycle=3600
-            )
+            if self._pasw is None:
+                self._dbConnection = create_engine(
+                    "mysql+pymysql://{}@{}:{}/{}".format(
+                        self._user,
+                        self._host,
+                        self._port,
+                        self._dbName
+                    ),
+                    pool_recycle=3600
+                )
+            else:
+                pass
             session = sessionmaker(bind=self._dbConnection)
             self.dbConnectionSession = session()
             self.updateDbModelStorage()
@@ -94,3 +98,4 @@ class DbConnection:
 
         if updateDbStructure(self._dbConnection) == 0:
             print("Струтура базы данных обновлена")
+            self.commitDbConnectionSession()

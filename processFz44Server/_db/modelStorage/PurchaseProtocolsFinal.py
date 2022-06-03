@@ -15,7 +15,7 @@ class PurchaseProtocolsFinal(Base):
                     о финале проведения процедуры закупок
     """
 
-    __tablename__ = "purchaseProtocolsFinal"
+    __tablename__ = "fz44PurchaseProtocolsFinal"
 
     id = Column(Integer, primary_key=True)
     purchaseNum = Column(String(length=50), unique=True)

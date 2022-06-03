@@ -9,4 +9,4 @@ if __name__ == "__main__":
                     файлов с информацией о закупках по 44 ФЗ
     """
 
-    ProcessingFolder("protocols").runProcessingFolder()
+    ProcessingFolder("fcs_fas").runProcessingFolder()
