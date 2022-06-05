@@ -7,7 +7,7 @@ class UnscheduledInspections:
     """
 
     def __init__(self) -> None:
-        
+
         """
             Автор:      Макаров Алексей
             Описание:   Магический метод,
@@ -16,9 +16,13 @@ class UnscheduledInspections:
 
         self.url = "https://tinyurl.com/mumkxx2p"
 
-        self.publicationNotificationsRecipients = [
-            "akulov@trade.su",
-            "pzm@contract-center.ru"
-        ]
+    def sendPublicationNotification() -> int:
 
-    def sendPublicationNotification():
+        """
+            Автор:      Макаров Алексей
+            Описание:   Выполнение поиска
+                        уведомлений о проведении внеплановой
+                        проверки и отправка сведений подписанному пользователю
+        """
+
+        return 0

@@ -42,7 +42,6 @@ class ProcessingFolderStrategics:
             self._essenceDataTool = EpNotificationsEF2020(fileContent)
 
         if re.match(r"epProtocol.*Final.*.xml", fileName):
-            print("here1")
             self._essenceDataTool = ProtocolsFinal(fileContent)
 
     def checkProcessingStrategics(self) -> bool:

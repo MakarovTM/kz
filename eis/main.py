@@ -1,3 +1,6 @@
+from db.DbConnection import DbConnection
+
+
 if __name__ == "__main__":
 
     """
@@ -6,4 +9,5 @@ if __name__ == "__main__":
                     обработку информации, размещаемой внутри ЕИС
     """
 
-    print("here")
+    a = DbConnection()
+    a.updateDbModelStorage()
